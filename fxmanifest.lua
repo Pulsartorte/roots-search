@@ -1,30 +1,37 @@
 fx_version "cerulean"
 
-description "A better document management script"
-author "K5 Scripts"
-version '1.3.4'
-update "Removed issuer job from citizen documents, added custom name column to received documents"
-repository 'https://github.com/kac5a/k5_documents'
+description "A better admin management script"
+author "Pulsartorte"
+version '1.0.0'
+
+repository 'https://github.com/'
 
 lua54 'yes'
 
 games {
-  "gta5",
+    "gta5",
+}
+
+dependencies {
+    'ox_lib'
 }
 
 ui_page 'web/build/index.html'
 
+shared_scripts {
+    '@ox_lib/init.lua',
+    'config.lua',
+}
+
 client_scripts {
-  "config.lua",
-  "client/**/*"
+    "modules/**/client/**/*"
 }
 server_scripts {
-  "@mysql-async/lib/MySQL.lua",
-  "config.lua",
-  "server/**/*"
+    'init.lua',
+    "modules/**/server/**/*"
 }
 
 files {
-  'web/build/index.html',
-  'web/build/**/*'
+    'web/build/index.html',
+    'web/build/**/*'
 }

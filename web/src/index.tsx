@@ -1,14 +1,14 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
-import App from './components/App';
+import App from './modules/App';
 import { VisibilityProvider } from './providers/VisibilityProvider';
 import theme from './theme/theme';
 import { createRoot } from 'react-dom/client';
 import { GlobalStyles } from '@mui/material';
 import { Box } from '@mui/system';
 import { DocumentProvider } from './providers/DocumentProvider';
-import DocumentViewFromPlayer from './components/Components/DocumentViewFromPlayer';
+import DocumentViewFromPlayer from './modules/documents/components/DocumentViewFromPlayer';
 
 const root = createRoot(document.getElementById('root')!);
 

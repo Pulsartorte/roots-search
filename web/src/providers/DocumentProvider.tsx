@@ -1,5 +1,5 @@
 import React, {createContext, useEffect, useState} from "react";
-import {useNuiEvent} from "../hooks/useNuiEvent";
+import {useNuiEvent} from "../modules/general/hooks/useNuiEvent";
 import { fetchNui } from "../utils/fetchNui";
 import { isEnvBrowser } from "../utils/misc";
 

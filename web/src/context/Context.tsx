@@ -1,5 +1,6 @@
 import React, { ReactNode, useCallback, useState } from "react"
 import { fetchNui } from "../utils/fetchNui"
+import Items from "../modules/items/Pages/Items";
 
 export type ContextType = {
   templates: DocumentTemplate[] | null
@@ -22,6 +23,21 @@ export type ContextType = {
   setDocumentCopiesLoading: (isLoading: boolean) => void
   handleGetDocumentCopies: () => void
 
+  jobs: Item[] | null
+  jobsLoading: boolean
+  setJobsLoading: (isLoading: boolean) => void
+  handleGetJobs: () => void
+
+  /*players: Player[] | null
+  playersLoading: boolean
+  setPlayersLoading: (isLoading: boolean) => void
+  handleGetPlayers: () => void*/
+
+  viewItem: Item | undefined
+  setViewJob: (item: Item | undefined) => void
+  isViewItemOpen: boolean
+  setViewJobOpen: (open: boolean) => void
+
 }
 
 export const Context = React.createContext<ContextType>({} as ContextType)
@@ -33,9 +49,18 @@ export const ContextProvider = (props: {children: ReactNode}) => {
   const [documentsLoading, setDocumentsLoading] = useState(false)
   const [documentCopies, setDocumentCopies] = useState<K5Document[] | null>(null)
   const [documentCopiesLoading, setDocumentCopiesLoading] = useState(false)
+  const [items, setItems] = useState<Item[] | null>(null)
+  const [itemsLoading, setItemsLoading] = useState(false)
 
   const [viewDocument, setViewDocument] = useState<K5Document | undefined>()
   const [isViewDocOpen, setViewDocOpen] = useState(false)
+
+  const [viewItem, setViewItem] = useState<Item | undefined>()
+  const [isViewItemOpen, setViewItemOpen] = useState(false)
+
+  /*const [players, setPlayers] = useState<Player[] | null>(null)
+  const [playersLoading, setPlayersLoading] = useState(false)*/
+
 
   const handleGetTemplates = useCallback(() => {
     fetchNui('getMyTemplates').then(retData => {
@@ -63,7 +88,28 @@ export const ContextProvider = (props: {children: ReactNode}) => {
       console.error('An error has occured')
     })
   }, [])
-  
+
+    const handleGetItems = useCallback(() => {
+        fetchNui('getItems').then(retData => {
+            //console.log('Received items from server:', retData);
+            setItemsLoading(false)
+            setItems(retData)
+        }).catch(_e => {
+            console.error('An error has occured')
+        })
+    }, [])
+
+    /*const handleGetPlayers = useCallback(() => {
+        fetchNui('getPlayers').then(retData => {
+            console.log('Received items from server:', retData);
+            setPlayersLoading(false)
+            setPlayers(retData)
+        }).catch(_e => {
+            console.error('An error has occured')
+        })
+    }, [])*/
+
+
   return (
     <Context.Provider value={{
       templates,
@@ -81,7 +127,19 @@ export const ContextProvider = (props: {children: ReactNode}) => {
       documentCopies,
       documentCopiesLoading,
       setDocumentCopiesLoading,
-      handleGetDocumentCopies
+      handleGetDocumentCopies,
+      jobs: items,
+      jobsLoading: itemsLoading,
+      setJobsLoading: setItemsLoading,
+      handleGetJobs: handleGetItems,
+      viewItem,
+      setViewJob: setViewItem,
+      isViewItemOpen,
+      setViewJobOpen: setViewItemOpen
+     /* players,
+      playersLoading,
+      setPlayersLoading,
+      handleGetPlayers,*/
     }}>
       {props.children}
     </Context.Provider>
