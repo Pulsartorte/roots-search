@@ -120,6 +120,7 @@ const TEXTS = {
   selectPlayers: 'Wähle ein Bürger',
 
   /* Jobs*/
+  jobEdit: ' bearbeiten',
   jobImage: 'Bild',
   jobName: 'Name',
   jobLabel: 'Label',

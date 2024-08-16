@@ -59,7 +59,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
         return `${key}${variable}`;
     };
 
-    const imageUrl = getTextWithVariable(itemImagePrefix, itemData?.image || '');
+    const itemImageUrl = getTextWithVariable(itemImagePrefix, itemData?.image || '');
 
     // Log the form values and errors
     const formValues = watch();
@@ -84,16 +84,34 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
         <form onSubmit={itemData ? handleSubmit(handleEditItem) : handleSubmit(handleCreateItem)}>
             <StyledDocument>
                 <Box style={{width: "calc(60vh - 3.6vh)"}}>
-                    <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
-                        {itemData ? texts.editItemTitle : texts.createItemTitle}
-                    </Typography>
-
-                    <IconButton
-                        style={{position: 'absolute', top: "1vh", right: "1vh"}}
-                        onClick={handleClose}
-                    >
-                        <CloseIcon/>
-                    </IconButton>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                        <Box display="flex" alignItems="center">
+                            <Controller
+                                name="name"
+                                control={control}
+                                render={({field}) => (
+                                    <Avatar
+                                        src={itemImageUrl}
+                                        alt={field.value}
+                                        style={{
+                                            width: '50px',
+                                            height: '50px',
+                                            marginRight: '10px'
+                                        }} // marginRight für Abstand zum Text
+                                    />
+                                )}
+                            />
+                            <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
+                                {itemData ? `${itemData.label} ${texts.jobEdit}` : texts.createItemTitle}
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            style={{position: 'absolute', top: "1vh", right: "1vh"}}
+                            onClick={handleClose}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </Box>
                     <Grid container spacing={2} width="100%">
                         <Grid item xs={6}>
                             <Controller
@@ -101,7 +119,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
                                 control={control}
                                 rules={{
                                     required: 'Name ist erforderlich!',
-                                    validate:  !isEditMode ? validateName : undefined
+                                    validate: !isEditMode ? validateName : undefined
                                 }}
                                 render={({field}) => (
                                     <TextField
@@ -114,7 +132,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
                                         disabled={Boolean(itemData?.name)}
                                         onChange={(e) => {
                                             field.onChange(e);
-                                            if (!isEditMode){
+                                            if (!isEditMode) {
                                                 validateName(e.target.value);
                                             }
                                         }}
@@ -156,20 +174,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={1}>
-                            <Controller
-                                name="image"
-                                control={control}
-                                render={({field}) => (
-                                    <Avatar
-                                        src={imageUrl}
-                                        alt={field.value}
-                                        style={{width: '50px', height: '50px', marginBottom: '10px'}}
-                                    />
-                                )}
-                            />
-                        </Grid>
-                        <Grid item xs={5}>
+                        <Grid item xs={6}>
                             <Controller
                                 name="image"
                                 control={control}
@@ -197,7 +202,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
                                         size="small"
                                         InputProps={{
                                             endAdornment: <InputAdornment
-                                                position="end">{texts.itemWeightUnit}</InputAdornment>,
+                                                position="end">{texts.itemWeightUnitG}</InputAdornment>,
                                         }}
                                     />
                                 )}

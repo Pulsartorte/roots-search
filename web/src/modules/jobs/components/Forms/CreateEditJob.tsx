@@ -47,35 +47,6 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
         name: "grades",
         rules: {required: texts.requiredError}
     })
-    /*console.log('Print JobData:')
-    console.log(jobData)*/
-
-
-    const [grades, setGrades] = useState<Grade[]>([])
-    const [gradesLoading, setGradesLoading] = useState(false)
-
-    const handleGetGrades = useCallback(() => {
-        setGradesLoading(true);
-
-        if (jobData?.grades) {
-            const gradesArray = jobData.grades
-            // Sortieren nach dem order-Feld
-            gradesArray.sort((a, b) => a.order - b.order);
-            setGrades(gradesArray); // Das verarbeitete und sortierte Array in den Zustand setzen
-        } else {
-            setGrades([]); // Fallback: Leeres Array, falls keine Grades vorhanden sind
-            console.log('jobToSet is empty or has no grades');
-        }
-
-        setGradesLoading(false);
-    }, [jobData]);
-
-    useEffect(() => {
-        if (jobData) {
-            handleGetGrades();
-        }
-    }, [jobData, handleGetGrades]);
-
 
     const handleCreateJob: SubmitHandler<Job> = (data: Job) => {
         handleCreate(data)
@@ -99,7 +70,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
         return `${key}${variable}`;
     };
 
-    const imageUrl = getTextWithVariable(jobImagePrefix, jobData?.name || '');
+    const serviceImageUrl = getTextWithVariable(jobImagePrefix, jobData?.name || '');
 
     // Log the form values and errors
     const formValues = watch();
@@ -124,16 +95,30 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
         <form onSubmit={jobData ? handleSubmit(handleEditJob) : handleSubmit(handleCreateJob)}>
             <StyledDocument>
                 <Box style={{width: "calc(60vh - 3.6vh)"}}>
-                    <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
-                        {jobData ? texts.editJobTitle : texts.createJobTitle}
-                    </Typography>
-
-                    <IconButton
-                        style={{position: 'absolute', top: "1vh", right: "1vh"}}
-                        onClick={handleClose}
-                    >
-                        <CloseIcon/>
-                    </IconButton>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                        <Box display="flex" alignItems="center">
+                            <Controller
+                                name="name"
+                                control={control}
+                                render={({ field }) => (
+                                    <Avatar
+                                        src={serviceImageUrl}
+                                        alt={field.value}
+                                        style={{ width: '50px', height: '50px', marginRight: '10px' }} // marginRight für Abstand zum Text
+                                    />
+                                )}
+                            />
+                            <Typography variant="h5" gutterBottom>
+                                {jobData ? `${jobData.label} ${texts.jobEdit}` : texts.createJobTitle}
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            style={{position: 'absolute', top: "1vh", right: "1vh"}}
+                            onClick={handleClose}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </Box>
                     <Grid container spacing={2} width="100%">
                         <Grid item xs={6}>
                             <Controller
@@ -146,7 +131,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
                                 render={({field}) => (
                                     <TextField
                                         {...field}
-                                        label={texts.itemName}
+                                        label={texts.jobName}
                                         error={!!errors.name}
                                         helperText={errors.name?.message as string}
                                         fullWidth
@@ -169,7 +154,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
                                 render={({field}) => (
                                     <TextField
                                         {...field}
-                                        label={texts.itemLabel}
+                                        label={texts.jobLabel}
                                         error={!!errors.label}
                                         helperText={errors.label?.message as string}
                                         fullWidth

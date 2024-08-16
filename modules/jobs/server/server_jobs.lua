@@ -38,10 +38,10 @@ RegisterCallback('roots-search:server:getJobs', function(source, cb)
             for k, v in pairs(jobs) do
                 local thisData = v
                 thisData.id = v.name
-          --[[      thisData.grades = json.decode(v.grades)
-                thisData.created = v.createDate
-                thisData.modified = v.modifiedDate
-                thisData.lastTouched = v.lastTouched]]
+                --[[      thisData.grades = json.decode(v.grades)
+                      thisData.created = v.createDate
+                      thisData.modified = v.modifiedDate
+                      thisData.lastTouched = v.lastTouched]]
 
                 -- Umwandlung von grades in ein Array und Berechnung von Min/Max Payment
                 local gradesArray = {}
@@ -59,6 +59,11 @@ RegisterCallback('roots-search:server:getJobs', function(source, cb)
                         maxPayment = grade.payment
                     end
                 end
+
+                -- Sortieren der Grades
+                table.sort(gradesArray, function(a, b)
+                    return a.order < b.order
+                end)
 
                 -- Setzen des umgewandelten grades Arrays und der Min/Max Werte
                 thisData.grades = gradesArray
@@ -166,11 +171,16 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
         print('AddJob: for ', jobData.jobName, jobData.jobGrade)
     end
 
+    local jobLabel = job.label
+    local jobGrades = job.grades
+    local jobGradeName = jobGrades[tostring(jobGrade)].name
+    print('Job Label: ', jobLabel)
+    print('Grade Label: ', jobGradeName)
     if not targetPlayerId then
         local Player = QBCore.Functions.GetPlayer(playerId)
         if Player then
             Player.Functions.SetJob(jobName, jobGrade)
-            local msg = string.format('Du hast dir %s %s gesetzt', job.label, job.grades[jobGrade].name)
+            local msg = string.format('Du hast dir Job: %s Rang: %s gesetzt', jobLabel, jobGradeName)
             QBCore.Functions.Notify(source, msg, 'success', 3500)
         else
             TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
@@ -178,9 +188,10 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
         -- Set Multi Job
         if isMultiJob then
             local citizenid = Player.PlayerData.citizenid
+            print(citizenid)
             local success = exports['ps-multijob']:AddJob(citizenid, jobName, jobGrade)
             if success then
-                local msg = string.format('Du hast dir %s %s im MultiJob zugewiesen', job.label, job.grades[jobGrade].name)
+                local msg = string.format('Du hast dir Job: %s Rang: %s im MultiJob zugewiesen', jobLabel, jobGradeName)
                 QBCore.Functions.Notify(source, msg, 'success', 3500)
             end
         end
@@ -188,9 +199,9 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
         local Player = QBCore.Functions.GetPlayer(targetPlayerId)
         if Player then
             Player.Functions.SetJob(jobName, jobGrade)
-            local msg = string.format('Du hast %s | %s %s zugewiesen', targetPlayerName, job.label, job.grades[jobGrade].name)
+            local msg = string.format('Du hast %s | Job: %s Rang: %s zugewiesen', targetPlayerName, jobLabel,jobGradeName)
             QBCore.Functions.Notify(playerId, msg, 'success', 3500)
-            local msg = string.format('Dir wurde %s %s gesetzt', job.label, job.grades[tostring(jobGrade)] )
+            local msg = string.format('Dir wurde Job: %s Rang: %s gesetzt', jobLabel, jobGradeName )
             QBCore.Functions.Notify(targetPlayerId, msg, 'success', 3500)
         else
             TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
@@ -200,9 +211,9 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
             local citizenid = Player.PlayerData.citizenid
             local success = exports['ps-multijob']:AddJob(citizenid, jobName, jobGrade)
             if success then
-                local msg = string.format('Du hast %s | %s %s im MultiJob zugewiesen', targetPlayerName, job.label, job.grades[jobGrade].name )
+                local msg = string.format('Du hast %s | Job: %s Rang: %s im MultiJob zugewiesen', targetPlayerName, jobLabel, jobGradeName)
                 QBCore.Functions.Notify(playerId, msg, 'success', 3500)
-                local msg = string.format('Dir wurde %s %s im MultiJob zugewiesen', job.label, job.grades[tostring(jobGrade)].name )
+                local msg = string.format('Dir wurde Job: %s Rang: %s im MultiJob zugewiesen', jobLabel, jobGradeName)
                 QBCore.Functions.Notify(targetPlayerId, msg, 'success', 3500)
             end
         end

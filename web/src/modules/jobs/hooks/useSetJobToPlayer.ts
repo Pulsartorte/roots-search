@@ -26,12 +26,14 @@ const useSetJobToPlayer = ({handleGetJobs,setJobsLoading,}: Props) => {
         order: parseInt(key, 10)
       }));*/
 
+/*
       console.log('Vor der Sortierung')
       console.log(gradesArray)
       // Sortieren nach dem order-Feld
       gradesArray.sort((a, b) => a.order - b.order);
       console.log('Nach der Sortierung')
       console.log(gradesArray)
+*/
 
       setGrades(gradesArray); // Das verarbeitete und sortierte Array in den Zustand setzen
     } else {
