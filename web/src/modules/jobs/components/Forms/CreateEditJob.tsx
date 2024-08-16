@@ -216,7 +216,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose}: P
                             </Typography>
                             <Divider style={{marginBottom: "16px"}}/> {/* Trennlinie */}
                         </Grid>
-                        <Grid item container spacing={2} style={{marginTop: "4px", maxHeight: '400px', overflowY: 'auto' }}>
+                        <Grid item container spacing={2} style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                 {formFields.map((f, i) => (
                                     <Grid item container xs={12} spacing={2} key={f.id} alignItems="center">
                                         <Grid item xs={4}>
