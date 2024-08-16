@@ -8,7 +8,7 @@ import { Tooltip } from "@mui/material"
 import moment from "moment";
 import { DATE_FORMAT } from "../../../utils/consts";
 import { texts } from "../../../AppConfig";
-import { Context } from "../../../context/Context";
+import { DocumentContext } from "../context/DocumentContext";
 import DocumentView from "../components/DocumentView";
 import DeleteDialog from "../../general/components/DeleteDialog";
 import useDeleteDocument from "../hooks/useDeleteDocument";
@@ -22,7 +22,7 @@ const MyDocuments = () => {
     setDocumentCopiesLoading,
     setViewDocOpen,
     setViewDocument
-  } = useContext(Context)
+  } = useContext(DocumentContext)
 
   const {
     isDeleteOpen,

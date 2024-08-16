@@ -7,6 +7,7 @@ import Jobs from '../jobs/Pages/Jobs';
 
 import { citizenTemplates, texts } from '../../AppConfig';
 import {Work} from "@mui/icons-material";
+import {ItemContext} from "../items/context/ItemContext";
 
 export const NavLinks: Page[] = [
   {
@@ -19,7 +20,7 @@ export const NavLinks: Page[] = [
   },
   {
     index: 1,
-    title: texts.rootsItemsTitle,
+    title: texts.rootsJobTitle,
     component: <Jobs/>,
     iconComponent: <WorkIcon/>,
     jobAccess: false,

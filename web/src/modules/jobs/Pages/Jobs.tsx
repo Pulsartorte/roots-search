@@ -7,12 +7,12 @@ import {
     GridRowParams,
     GridValueGetterParams
 } from "@mui/x-data-grid";
-import {Box, Button, Checkbox, Dialog, Grid, IconButton, InputAdornment, TextField, Tooltip} from "@mui/material";
+import {Box, Button, Checkbox, Chip, Dialog, Grid, IconButton, InputAdornment, TextField, Tooltip} from "@mui/material";
 import moment from "moment";
 import {DATE_FORMAT} from "../../../utils/consts";
-import {imagePrefix, texts} from "../../../AppConfig";
+import {jobImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
-import {Context} from "../../../context/Context";
+import {JobContext} from "../context/JobContext";
 import DeleteDialog from "../../general/components/DeleteDialog";
 import CreateEditJob from "../components/Forms/CreateEditJob";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,9 +24,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import useSetJob from "../hooks/useSetJob";
-import GiveItemDialog from "../components/GiveItemDialog";
+import SetJobDialog from "../components/SetJobDialog";
 import useSetJobToPlayer from "../hooks/useSetJobToPlayer";
-import GiveItemToPlayerDialog from "../components/GiveItemToPlayerDialog";
+import SetJobToPlayerDialog from "../components/SetJobToPlayerDialog";
 
 const Jobs = () => {
         const {
@@ -36,11 +36,11 @@ const Jobs = () => {
             setJobsLoading,
             setViewJobOpen,
             setViewJob,
-        /*    players,
-            handleGetPlayers,
-            playersLoading,
-            setPlayersLoading*/
-        } = useContext(Context);
+            /*    players,
+                handleGetPlayers,
+                playersLoading,
+                setPlayersLoading*/
+        } = useContext(JobContext);
 
 
         const {
@@ -49,7 +49,12 @@ const Jobs = () => {
             jobToSet,
             setJobToSet,
             handleSetJob,
-            handleSetJobCancel
+            handleSetJobCancel,
+            grades,
+            setGrades,
+            handleGetGrades,
+            gradesLoading,
+            setGradesLoading
         } = useSetJob({handleGetJobs: handleGetJobs, setJobsLoading: setJobsLoading})
 
         const {
@@ -63,21 +68,26 @@ const Jobs = () => {
             setPlayers,
             handleGetPlayers,
             playersLoading,
-            setPlayersLoading
+            setPlayersLoading,
+            gradesPlayer,
+            setGradesPlayer,
+            handleGetGradesPlayer,
+            gradesPlayerLoading,
+            setGradesPlayerLoading
         } = useSetJobToPlayer({handleGetJobs: handleGetJobs, setJobsLoading: setJobsLoading})
 
         const {
             isDeleteOpen,
             setDeleteOpen,
-            itemToDelete,
+            jobToDelete,
             setItemToDelete,
             handleDelete,
             handleCancel
         } = useDeleteJob({handleGetJobs: handleGetJobs, setJobsLoading: setJobsLoading})
 
 
-        const [isItemFormOpen, setItemFormOpen] = useState(false)
-        const [currentItem, setCurrentItem] = useState<Item | undefined>()
+        const [isJobFormOpen, setJobFormOpen] = useState(false)
+        const [currentJob, setCurrentJob] = useState<Job | undefined>()
 
         const [pageSize, setPageSize] = useState(15);  // Setzt die Anfangsgröße der Seite
 
@@ -87,9 +97,6 @@ const Jobs = () => {
             if (jobs === null) handleGetJobs();
         }, [jobs, handleGetJobs]);
 
-        /*useEffect(() => {
-            if (players === null) handleGetPlayers();
-        }, [players, handleGetPlayers]);*/
 
         const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
             setSearchText(event.target.value);
@@ -100,17 +107,42 @@ const Jobs = () => {
         };
 
 
-        const filteredItems = jobs?.filter((item) =>
-            item.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.label?.toLowerCase().includes(searchText.toLowerCase())
+        const filteredItems = jobs?.filter((job) =>
+            job.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+            job.label?.toLowerCase().includes(searchText.toLowerCase()) ||
+            job.type?.toLowerCase().includes(searchText.toLowerCase()) ||
+            job.grades?.some(grade =>
+                grade.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                grade.payment?.toString().includes(searchText) // falls du nach payment suchst
+            )
         ) ?? [];
 
-        const handleCreate = useCallback((data: Item) => {
-            setItemFormOpen(false)
+        function convertGradesToObject(job: Job): Job {
+            // Umwandlung des grades-Arrays in ein schlüsselbasiertes Objekt
+            const gradesObject = job.grades.reduce((obj, grade) => {
+                obj[grade.order] = {
+                    name: grade.name,
+                    payment: Number(grade.payment),
+                    isboss: grade.isboss,
+                };
+                return obj;
+            }, {} as Record<string, Omit<Grade, 'order'>>);
+            console.log(job.grades)
+            console.log('Converting')
+            console.log(gradesObject)
+            // Rückgabe eines neuen Job-Objekts mit dem umgewandelten grades-Objekt
+            return {
+                ...job,
+                grades: gradesObject as any, // Typanpassung, falls notwendig
+            };
+        }
+
+        const handleCreate = useCallback((data: Job) => {
+            setJobFormOpen(false)
             setJobsLoading(true)
             console.log('handleCreate: useCallback createItem')
-            console.log(JSON.stringify(data))
-            fetchNui('createJob', JSON.stringify(data)).then(_retData => {
+            console.log(JSON.stringify(convertGradesToObject(data)))
+            fetchNui('createJob', JSON.stringify(convertGradesToObject(data))).then(_retData => {
                 console.log('handleCreate: fetchNui createItem')
                 console.log(JSON.stringify(data))
                 handleGetJobs()
@@ -121,12 +153,12 @@ const Jobs = () => {
 
         }, [handleGetJobs, setJobsLoading])
 
-        const handleEdit = useCallback((data: Item) => {
-            setItemFormOpen(false)
+        const handleEdit = useCallback((data: Job) => {
+            setJobFormOpen(false)
             setJobsLoading(true)
             console.log('handleEdit: useCallback editItem')
-            console.log(JSON.stringify(data))
-            fetchNui('editJob', JSON.stringify(data)).then(_retData => {
+            console.log(JSON.stringify(convertGradesToObject(data)))
+            fetchNui('editJob', JSON.stringify(convertGradesToObject(data))).then(_retData => {
                 console.log('handleEdit: fetchNui editItem')
                 console.log(JSON.stringify(data))
                 handleGetJobs()
@@ -138,33 +170,21 @@ const Jobs = () => {
         }, [handleGetJobs, setJobsLoading])
 
         const handleClose = useCallback(() => {
-            setItemFormOpen(false)
+            setJobFormOpen(false)
             setJobsLoading(true)
-            setCurrentItem(undefined)
+            setCurrentJob(undefined)
             handleGetJobs()
-
-            /*console.log('handleEdit: useCallback')
-            console.log(JSON.stringify(data))
-            fetchNui('editItem', JSON.stringify(data)).then(_retData => {
-                console.log('handleEdit: fetchNui editItem')
-                console.log(JSON.stringify(data))
-                handleGetItems()
-                return
-            }).catch(_e => {
-                console.error('An error has occured')
-            })*/
-
         }, [handleGetJobs, setJobsLoading])
 
         const columns: GridColumns<Job> = [
             {
-                // TODO Check Images from LB Phone APP?
-                field: 'image',
-                headerName: texts.itemImage,
+                // This is only for the image wrapping
+                field: 'name',
+                headerName: texts.jobImage,
                 width: 75,
                 renderCell: (params: GridRenderCellParams<string>) => (
                     <img
-                        src={`${imagePrefix}${params.value}`}
+                        src={`${jobImagePrefix}${params.value}`}
                         alt="item"
                         style={{width: '50px', height: '50px', objectFit: 'contain'}}
                     />
@@ -172,22 +192,49 @@ const Jobs = () => {
             },
             {
                 field: 'label',
-                headerName: texts.itemLabel,
+                headerName: texts.jobLabel,
                 flex: 1,
             },
             {
-                field: 'description',
-                headerName: texts.itemDescription,
-                flex: 2,
-            },
-            {
-                field: 'weight',
-                headerName: texts.itemWeight,
+                field: 'gradesCount',
+                headerName: texts.jobGradesCount,
                 flex: 1,
+                valueGetter: (params) => {
+                    const grades = params.row.grades;
+                    return grades.length;
+                },
             },
             {
-                field: 'useable',
-                headerName: texts.itemUseable,
+                field: 'minPayment',
+                headerName: texts.jobGradesMinPayment,
+                flex: 1,
+                renderCell: (params) => {
+                    const minPayment = params.row.minPayment;
+
+                    return (
+                        <div>
+                            <Chip label={`$${minPayment}`} color="secondary"/>
+                        </div>
+                    );
+                }
+            },
+            {
+                field: 'maxPayment',
+                headerName: texts.jobGradesMaxPayment,
+                flex: 1,
+                renderCell: (params) => {
+                    const maxPayment = params.row.maxPayment;
+
+                    return (
+                        <div>
+                            <Chip label={`$${maxPayment}`} color="primary" style={{marginRight: 5}}/>
+                        </div>
+                    );
+                }
+            },
+            {
+                field: 'defaultDuty',
+                headerName: texts.jobDefaultDuty,
                 flex: 1,
                 renderCell: (params) => (
                     <Checkbox
@@ -197,32 +244,67 @@ const Jobs = () => {
                 ),
             },
             {
-                field: 'created',
-                headerName: texts.itemCreateTime,
-                width: 150,
-                valueGetter: (params: GridValueGetterParams) => (new Date(params.row.created)),
+                field: 'offDutyPay',
+                headerName: texts.jobOffDutyPay,
+                flex: 1,
+                renderCell: (params) => (
+                    <Checkbox
+                        checked={params.value}
+                        disabled // macht die Checkbox nicht bearbeitbar
+                    />
+                ),
+            },
+            {
+                field: 'createDate',
+                headerName: texts.jobCreateTime,
+                flex: 1,
+                valueGetter: (params: GridValueGetterParams) => (new Date(params.row.createDate)),
                 valueFormatter: params => moment(new Date(params?.value)).format(DATE_FORMAT),
+            },
+            {
+                field: 'modifiedDate',
+                headerName: texts.jobModifiedTime,
+                flex: 1,
+                valueGetter: (params: GridValueGetterParams) => {
+                    const dateValue = params.row.modifiedDate;
+                    return dateValue === 0 ? null : new Date(dateValue);
+                },
+                valueFormatter: (params) => {
+                    if (!params.value) {
+                        return 'N/A';
+                    }
+                    return moment(new Date(params.value)).format(DATE_FORMAT);
+                },
+            },
+            {
+                field: 'lastTouched',
+                headerName: texts.jobModifiedBy,
+                flex: 1
             },
             {
                 field: 'playerActions',
                 headerName: texts.playerActions,
                 type: 'actions',
                 getActions: (data: GridRowParams) => [
-                    (<Tooltip title={texts.giveYourself}>
-                        <GridActionsCellItem icon={<MedicalServicesIcon/>} onClick={() => {
-                            setJobToSet(jobs?.filter(t => t.name === data.id)[0])
-                            setSetJobOpen(true)
-                        }} label={texts.giveYourself}/>
+                    (<Tooltip title={texts.setJob}>
+                        <GridActionsCellItem
+                            icon={<MedicalServicesIcon/>}
+                            onClick={() => {
+                                const job = jobs?.find(t => t.name === data.id);
+                                if (job) {
+                                    setJobToSet(job);
+                                } else {
+                                    console.log('Job not found');
+                                }
+                            }}
+                            label={texts.setJob}
+                        />
                     </Tooltip>),
-                    (<Tooltip title={texts.givePlayer}>
+                    (<Tooltip title={texts.setJobToPlayer}>
                         <GridActionsCellItem icon={<PersonAddAlt1Icon/>} onClick={() => {
                             setJobToSetToPlayer(jobs?.filter(t => t.name === data.id)[0])
-                            setPlayersLoading(true)
                             handleGetPlayers()
-                            setPlayers(players)
-                            setPlayersLoading(false)
-                            setSetJobToPlayerOpen(true)
-                        }} label={texts.givePlayer}/>
+                        }} label={texts.setJobToPlayer}/>
                     </Tooltip>),
                 ],
                 width: 100,
@@ -234,8 +316,8 @@ const Jobs = () => {
                 getActions: (data: GridRowParams) => [
                     (<Tooltip title={texts.edit}>
                         <GridActionsCellItem icon={<EditIcon/>} onClick={() => {
-                            setCurrentItem(jobs?.filter(t => t.name === data.id)[0])
-                            setItemFormOpen(true)
+                            setCurrentJob(jobs?.filter(t => t.name === data.id)[0])
+                            setJobFormOpen(true)
                         }} label={texts.edit}/>
                     </Tooltip>),
                     (<Tooltip title={texts.delete}>
@@ -276,17 +358,17 @@ const Jobs = () => {
                             {/*         <IconButton
                                 size={"large"}
                                 style={{}}
-                                onClick={() => setItemFormOpen(true)}
+                                onClick={() => setJobFormOpen(true)}
                                 aria-label={texts.createItemBtn}
                             >
                                 <AddIcon/>
                             </IconButton>*/}
                             <Button variant="contained"
-                                    onClick={() => setItemFormOpen(true)}
+                                    onClick={() => setJobFormOpen(true)}
                                     style={{padding: "1vh"}}
                                     fullWidth
                                     startIcon={<AddIcon/>}
-                            >{texts.createItemBtn}</Button>
+                            >{texts.createJobBtn}</Button>
                         </Grid>
                     </Grid>
                     <DataGrid
@@ -302,38 +384,43 @@ const Jobs = () => {
                         disableSelectionOnClick
                     />
                     {/* <Button variant="contained"
-                            onClick={() => setItemFormOpen(true)}
+                            onClick={() => setJobFormOpen(true)}
                             style={{marginTop: "1vh"}}
                             startIcon={<AddIcon/>}>{texts.createItemBtn}</Button>*/}
 
                 </Box>
-                <Dialog maxWidth="md" open={isItemFormOpen} onClose={() => {
-                    setItemFormOpen(false)
-                    setCurrentItem(undefined)
+                <Dialog maxWidth="md" open={isJobFormOpen} onClose={() => {
+                    setJobFormOpen(false)
+                    setCurrentJob(undefined)
                 }}>
                     <CreateEditJob jobs={jobs} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
-                                   jobData={currentItem}/>
+                                   jobData={currentJob}/>
                 </Dialog>
-                <GiveItemDialog
+                <SetJobDialog
                     open={isSetJobOpen}
                     handleAgree={handleSetJob}
                     handleCancel={handleSetJobCancel}
                     title={`${jobToSet?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}/>
-                <GiveItemToPlayerDialog
+                    text={`<strong>${texts.setJobQuestion}`}
+                    grades={grades}
+                    gradesLoading={jobsLoading}
+                />
+                <SetJobToPlayerDialog
                     open={isSetJobToPlayerOpen}
                     handleAgree={handleSetJobToPlayer}
                     handleCancel={handleSetJobToPlayerCancel}
                     players={players}
                     playersLoading={playersLoading}
+                    grades={gradesPlayer}
+                    gradesLoading={jobsLoading}
                     title={`${jobToSetToPlayer?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}/>
+                    text={`<strong>${texts.setJobToPlayerQuestion}`}/>
                 <DeleteDialog
                     open={isDeleteOpen}
                     handleAgree={handleDelete}
                     handleCancel={handleCancel}
-                    title={`${itemToDelete?.label || ""}`}
-                    text={`<strong>${texts.deleteItemQuestion}`}/>
+                    title={`${jobToDelete?.label || ""}`}
+                    text={`<strong>${texts.deleteJobQuestion}`}/>
             </>
         );
     }

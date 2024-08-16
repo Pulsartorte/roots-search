@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useState } from "react"
-import { fetchNui } from "../utils/fetchNui"
+import { fetchNui } from "../../../utils/fetchNui"
 
 export type ContextType = {
   templates: DocumentTemplate[] | null
@@ -23,9 +23,9 @@ export type ContextType = {
   handleGetDocumentCopies: () => void
 }
 
-export const Context = React.createContext<ContextType>({} as ContextType)
+export const DocumentContext = React.createContext<ContextType>({} as ContextType)
 
-export const ContextProvider = (props: {children: ReactNode}) => {
+export const DocumentContextProvider = (props: {children: ReactNode}) => {
   const [templates, setTemplates] = useState<DocumentTemplate[] | null>(null)
   const [templatesLoading, setTemplatesLoading] = useState(false)
   const [documents, setDocuments] = useState<K5Document[] | null>(null)
@@ -74,7 +74,7 @@ export const ContextProvider = (props: {children: ReactNode}) => {
 
 
   return (
-    <Context.Provider value={{
+    <DocumentContext.Provider value={{
       templates,
       templatesLoading,
       setTemplatesLoading,
@@ -93,6 +93,6 @@ export const ContextProvider = (props: {children: ReactNode}) => {
       handleGetDocumentCopies,
     }}>
       {props.children}
-    </Context.Provider>
+    </DocumentContext.Provider>
   )
 }

@@ -67,7 +67,8 @@ const COLORS = {
   menuGradientTop: 'rgb(221,161,94)',
 }
 
-const IMAGE_PREFIX = 'nui://ak47_qb_inventory/web/build/images/'
+const ITEM_IMAGE_PREFIX = 'nui://ak47_qb_inventory/web/build/images/'
+const JOB_IMAGE_PREFIX = 'nui://lb-phone/ui/dist/assets/img/icons/services/'
 
 // These are the texts that show up on the NUI. Translate them as you wish. If you'd like to change
 // the client texts, go to the config.lua file.
@@ -84,14 +85,18 @@ const TEXTS = {
   giveInventory: 'Item geben',
   givePlayer: 'Item geben',
   giveYourself: 'Ins Inventar',
+  setJob: 'Job setzen',
+  setJobToPlayer: 'Spieler Job setzen',
   playerActions: 'Spieler Aktionen',
+
   /* Items*/
   itemImage: 'Bild',
   itemName: 'Name',
   itemLabel: 'Label',
   itemDescription: 'Beschreibung',
   itemWeight: 'Gewicht',
-  itemWeightUnit: 'g',
+  itemWeightUnitG: 'g',
+  itemWeightUnitKG: 'kg',
   itemType: 'Item Type',
   itemUnique: 'Einzigartig',
   itemUseable: 'Benutzbar',
@@ -99,6 +104,8 @@ const TEXTS = {
   itemCombinable: 'Kombinierbar',
   itemShouldClose: 'ShouldClose',
   itemCreateTime: 'Erstellt am',
+  itemModifiedTime: 'Bearbeitet am',
+  itemModifiedBy: 'Bearbeitet von',
   createItemTitle: 'Item erstellen',
   editItemTitle: 'Item bearbeiten',
   editItemBtn: 'Speichern',
@@ -111,6 +118,40 @@ const TEXTS = {
   itemQuantityToGive: 'Menge',
   giveItemTitle: 'Item geben',
   selectPlayers: 'Wähle ein Bürger',
+
+  /* Jobs*/
+  jobImage: 'Bild',
+  jobName: 'Name',
+  jobLabel: 'Label',
+  jobType: 'Job Type',
+  jobGrades: 'Ränge',
+  jobPayment: 'Bezahlung',
+  jobIsBoss: 'Boss',
+  jobAddGrade: 'Rang hinzufügen',
+  jobGradesCount: 'Anzahl der Ränge',
+  jobDefaultDuty: 'Standard im Dienst',
+  jobOffDutyPay: 'Vergütung außerhalb des Dienstes',
+  jobCreateTime: 'Erstellt am',
+  jobModifiedTime: 'Bearbeitet am',
+  jobModifiedBy: 'Bearbeitet von',
+  createJobTitle: 'Job erstellen',
+  editJobTitle: 'Job bearbeiten',
+  editJobBtn: 'Speichern',
+  createJobBtn: 'Erstellen',
+  createBtn: 'Erstellen',
+  deleteJobTitle: 'Job löschen',
+  deleteJobQuestion: 'Willst du das Job wirklich löschen?',
+  setJobQuestion: 'Welchen Rang möchtest du dir geben?',
+  setJobToPlayerQuestion: 'Welchen Rang möchtest du dem Bürger geben?',
+  jobQuantityToGive: 'Menge',
+  setJobTitle: 'Job setzen',
+  selectJobGrade: 'Wähle ein Rang',
+  isMultiJob: 'Als MultiJob hinzufügen',
+  isMultiJobTooltip: 'Du kannst deinen Job wechseln indem du "J" drückst. Dort kannst du dann selektieren in welchem Job du sein möchtest',
+  jobGradesMinPayment: 'Min. Gehalt',
+  jobGradesMaxPayment: 'Max. Gehalt',
+
+
 
   /* Documents Translations*/
   myDocumentsTitle: 'My Documents',

@@ -7,7 +7,7 @@ import { Button, Dialog, Tooltip } from "@mui/material"
 import CreateEditTemplate from "../components/Forms/CreateEditTemplate"
 import DeleteDialog from "../../general/components/DeleteDialog"
 import useDeleteTemplate from "../hooks/useDeleteTemplate"
-import { Context } from "../../../context/Context"
+import { DocumentContext } from "../context/DocumentContext"
 import { texts } from "../../../AppConfig"
 
 const Templates = () => {
@@ -15,7 +15,7 @@ const Templates = () => {
   const [isTemplateFormOpen, setTemplateFormOpen] = useState(false)
   const [currentTemplate, setCurrentTemplate] = useState<DocumentTemplate | undefined>()
 
-  const { templates, handleGetTemplates, templatesLoading, setTemplatesLoading } = useContext(Context)
+  const { templates, handleGetTemplates, templatesLoading, setTemplatesLoading } = useContext(DocumentContext)
 
   useEffect(() => {
     templates === null && handleGetTemplates()

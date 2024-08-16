@@ -38,11 +38,40 @@ RegisterCallback('roots-search:server:getJobs', function(source, cb)
             for k, v in pairs(jobs) do
                 local thisData = v
                 thisData.id = v.name
-                thisData.created = v.created
+          --[[      thisData.grades = json.decode(v.grades)
+                thisData.created = v.createDate
+                thisData.modified = v.modifiedDate
+                thisData.lastTouched = v.lastTouched]]
+
+                -- Umwandlung von grades in ein Array und Berechnung von Min/Max Payment
+                local gradesArray = {}
+                local minPayment, maxPayment = nil, nil
+
+                for key, grade in pairs(json.decode(v.grades)) do
+                    grade.order = tonumber(key)
+                    table.insert(gradesArray, grade)
+
+                    -- Berechnung von minPayment und maxPayment
+                    if not minPayment or grade.payment < minPayment then
+                        minPayment = grade.payment
+                    end
+                    if not maxPayment or grade.payment > maxPayment then
+                        maxPayment = grade.payment
+                    end
+                end
+
+                -- Setzen des umgewandelten grades Arrays und der Min/Max Werte
+                thisData.grades = gradesArray
+                thisData.minPayment = minPayment
+                thisData.maxPayment = maxPayment
+
+                -- Hinzufügen des verarbeiteten Datensatzes zur Ergebnisliste
                 table.insert(mappedResult, thisData)
 
                 -- Debugging: Ausgabe der einzelnen Jobs
-                --print('Job added:', json.encode(thisData))
+                if config.debugMode then
+                    --print('Job:', json.encode(thisData))
+                end
             end
             cb(mappedResult)
         else
@@ -54,7 +83,6 @@ end)
 
 RegisterCallback('roots-search:server:createJob', function(source, cb, data)
     local src = source
-    local PlayerJobName = GetPlayerJobName(src)
     if config.debugMode then
         print('roots-search:server:createJob')
         print(json.encode(data))
@@ -65,6 +93,8 @@ RegisterCallback('roots-search:server:createJob', function(source, cb, data)
         jobName = job.name
     end
     local jobData = job
+
+    jobData.lastTouched = GetPlayerAccountName(source)
 
     RCore.Functions.Jobs.addJob(jobName, jobData, function(success)
         if success then
@@ -88,6 +118,8 @@ RegisterCallback('roots-search:server:editJob', function(source, cb, data)
     end
     local jobData = job
 
+    jobData.lastTouched = GetPlayerAccountName(source)
+
     RCore.Functions.Jobs.updateJob(jobName, jobData, function(success)
         if success then
             print('Jobs erfolgreich aktualisiert!')
@@ -110,92 +142,72 @@ RegisterCallback('roots-search:server:deleteJob', function(source, cb, data)
     end)
 end)
 
-RegisterCallback('roots-search:server:getPlayers', function(source, cb)
-    print('roots-search:server:getPlayers triggered, returning all online players')
-    -- TODO build players ID, Firstname, Lastname
-    local players = GetQBPlayers()
-    cb(players)
-end)
-
-
-RegisterServerEvent('roots-search:server:giveJobYourself')
-AddEventHandler('roots-search:server:giveJobYourself', function(data)
+RegisterServerEvent('roots-search:server:setJob')
+AddEventHandler('roots-search:server:setJob', function(jobData)
     local playerId = source
-    local amount = data.quantity
-    local jobData = QBCore.Shared.Jobs[data.jobName]
+    local jobName = jobData.jobName
+    local jobGrade = jobData.jobGrade
+    local targetPlayerId = jobData.targetPlayerId
+    local targetPlayerName = jobData.targetPlayerName
+    local isMultiJob = jobData.isMultiJob
+    local job = QBCore.Shared.Jobs[jobName]
 
+    if not job then
+        print('Job nicht verfügbar.')
+        local msg = string.format('Job %s %s nicht verfügbar!', job.label, job.grades[jobGrade] )
+        QBCore.Functions.Notify(source, msg, 'success', 3500)
+        return
+    end
     if config.debugMode then
-        print('roots-search:server:giveJobYourself triggered')
-        print('Data: ', json.encode(data))
-        print('ID: ', playerId)
-        print('Amount:', amount)
-        print('AddJob:', json.encode(jobData))
+        print('roots-search:server:setJob to Player triggered')
+        print('Data: ', json.encode(jobData))
+        print('PlayerId: ', playerId)
+        print('TargetPlayerId:', targetPlayerId)
+        print('AddJob: for ', jobData.jobName, jobData.jobGrade)
     end
 
-    local player = QBCore.Functions.GetPlayer(playerId)
-    if jobData then
-        -- check jobinfo
-        local info = prepareJobInfo(player, jobData)
-
-        local jobAdded = exports['qb-inventory']:AddJob(playerId, jobData['name'], amount, false, info, 'Roots Search')
-        if jobAdded then
-            local msg = string.format('Du hast dir %dx %s gegeben', amount, jobData['label'])
+    if not targetPlayerId then
+        local Player = QBCore.Functions.GetPlayer(playerId)
+        if Player then
+            Player.Functions.SetJob(jobName, jobGrade)
+            local msg = string.format('Du hast dir %s %s gesetzt', job.label, job.grades[jobGrade].name)
             QBCore.Functions.Notify(source, msg, 'success', 3500)
-            TriggerClientEvent('qb-inventory:client:JobBox', playerId, jobData, 'add', amount)
-            if Player(playerId).state.inv_busy then
-                TriggerClientEvent('qb-inventory:client:updateInventory', playerId)
-            end
         else
-            local msg = string.format('%d x %s konnten nicht ins Inventar gelegt werden!', amount, jobData['name'])
-            QBCore.Functions.Notify(source, msg, 'error', 3500)
+            TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
+        end
+        -- Set Multi Job
+        if isMultiJob then
+            local citizenid = Player.PlayerData.citizenid
+            local success = exports['ps-multijob']:AddJob(citizenid, jobName, jobGrade)
+            if success then
+                local msg = string.format('Du hast dir %s %s im MultiJob zugewiesen', job.label, job.grades[jobGrade].name)
+                QBCore.Functions.Notify(source, msg, 'success', 3500)
+            end
         end
     else
-        local msg = string.format('Fehler in JobData! %s Object leer. Kontaktiere ein Developer', data.jobName)
-        QBCore.Functions.Notify(source, msg, 'error')
-        QBCore.Functions.Notify(source, 'Warte bis zum nächsten Restart!', 'error', 3500)
-        QBCore.Functions.Notify(source, msg, 'Dann sollte es da sein! ;-)', 3500)
-    end
-
-    --[[TriggerClientEvent("roots-search:client:client:jobGiven", src, data.name)]]
-end)
-
-RegisterServerEvent('roots-search:server:giveJob')
-AddEventHandler('roots-search:server:giveJob', function(data)
-    local playerId = source
-    local targetPlayerId = data.targetPlayerId
-    local targetPlayerName = data.targetPlayerName
-    local amount = data.quantity
-    local jobData = QBCore.Shared.Jobs[data.jobName]
-
-    if config.debugMode then
-        print('roots-search:server:giveJob to Player triggered')
-        print('Data: ', json.encode(data))
-        print('ID: ', playerId)
-        print('Amount:', amount)
-        print('AddJob:', json.encode(jobData))
-    end
-
-    local targetPlayer = QBCore.Functions.GetPlayer(targetPlayerId)
-    if jobData then
-        -- check jobinfo
-        local info = prepareJobInfo(targetPlayerId, jobData)
-        local jobAdded = exports['qb-inventory']:AddJob(targetPlayerId, jobData['name'], amount, false, info, 'give job command')
-        if jobAdded then
-            local msg = string.format('Du hast %s %dx %s gegeben', targetPlayerName, amount, jobData['label'])
-            QBCore.Functions.Notify(source, msg, 'success', 3500)
-            TriggerClientEvent('qb-inventory:client:JobBox', playerId, jobData, 'add', amount)
-            if Player(playerId).state.inv_busy then
-                TriggerClientEvent('qb-inventory:client:updateInventory', playerId)
-            end
-            TriggerClientEvent("roots-search:client:jobGiven", playerId, jobName)
-            TriggerClientEvent("roots-search:client:jobReceived", targetPlayerId, jobName)
+        local Player = QBCore.Functions.GetPlayer(targetPlayerId)
+        if Player then
+            Player.Functions.SetJob(jobName, jobGrade)
+            local msg = string.format('Du hast %s | %s %s zugewiesen', targetPlayerName, job.label, job.grades[jobGrade].name)
+            QBCore.Functions.Notify(playerId, msg, 'success', 3500)
+            local msg = string.format('Dir wurde %s %s gesetzt', job.label, job.grades[tostring(jobGrade)] )
+            QBCore.Functions.Notify(targetPlayerId, msg, 'success', 3500)
         else
-            local msg = string.format('%d x %s konnten nicht ins Inventar gelegt werden!', amount, jobData['name'])
-            QBCore.Functions.Notify(source, msg, 'error', 3500)
+            TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
         end
-    else
-        local msg = string.format('Fehler in JobData! %s Object leer. Kontaktiere ein Developer', jobName)
-        QBCore.Functions.Notify(source, msg, 'error')
+
+        if isMultiJob then
+            local citizenid = Player.PlayerData.citizenid
+            local success = exports['ps-multijob']:AddJob(citizenid, jobName, jobGrade)
+            if success then
+                local msg = string.format('Du hast %s | %s %s im MultiJob zugewiesen', targetPlayerName, job.label, job.grades[jobGrade].name )
+                QBCore.Functions.Notify(playerId, msg, 'success', 3500)
+                local msg = string.format('Dir wurde %s %s im MultiJob zugewiesen', job.label, job.grades[tostring(jobGrade)].name )
+                QBCore.Functions.Notify(targetPlayerId, msg, 'success', 3500)
+            end
+        end
+        --TriggerClientEvent("roots-search:client:jobGiven", playerId, jobName)
+        --TriggerClientEvent("roots-search:client:jobReceived", targetPlayerId, jobName)
     end
 end)
 

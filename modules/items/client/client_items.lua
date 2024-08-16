@@ -110,21 +110,6 @@ RegisterNUICallback('getPlayerJob', function(data, cb)
     end
 end)
 
-RegisterNUICallback('getPlayers', function(data, cb)
-    print('getPlayers triggered')
-    TriggerCallback('roots-search:client:getPlayers', function(result)
-        print('roots-search:getPlayers callback triggered')
-        local createdItem = json.encode(result)
-        if #result == 1 then
-            QBCore.Functions.Notify(('%d Bürger erfolgreich geladen!'):format(#result), 'success', 3000)
-        elseif #result > 1 then
-            QBCore.Functions.Notify(('%d Bürger erfolgreich geladen!'):format(#result), 'success', 3000)
-        end
-        cb(result)
-    end,
-            data)
-end)
-
 -- Server-side callback registration
 RegisterNUICallback('getItems', function(data, cb)
     print('NUICallback getItems triggered')

@@ -23,7 +23,7 @@ export const useJob = () => {
   }
 
   return {
-    job,
+    requiredJob: job,
     setJob,
     isBoss
   }

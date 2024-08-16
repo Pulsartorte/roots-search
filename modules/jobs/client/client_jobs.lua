@@ -110,21 +110,6 @@ RegisterNUICallback('getPlayerJob', function(data, cb)
     end
 end)
 
-RegisterNUICallback('getPlayers', function(data, cb)
-    print('getPlayers triggered')
-    TriggerCallback('roots-search:client:getPlayers', function(result)
-        print('roots-search:getPlayers callback triggered')
-        local createdJob = json.encode(result)
-        if #result == 1 then
-            QBCore.Functions.Notify(('%d Bürger erfolgreich geladen!'):format(#result), 'success', 3000)
-        elseif #result > 1 then
-            QBCore.Functions.Notify(('%d Bürger erfolgreich geladen!'):format(#result), 'success', 3000)
-        end
-        cb(result)
-    end,
-            data)
-end)
-
 -- Server-side callback registration
 RegisterNUICallback('getJobs', function(data, cb)
     print('NUICallback getJobs triggered')
@@ -137,7 +122,6 @@ RegisterNUICallback('getJobs', function(data, cb)
         cb(result)
     end)
 end)
-
 
 RegisterNUICallback('createJob', function(data, cb)
     print('NUICallback createJob triggered')
@@ -174,36 +158,22 @@ RegisterNUICallback('deleteJob', function(data, cb)
             data)
 end)
 
-RegisterNUICallback('giveJobYourself', function(data, cb)
-    print('giveJobYourself triggered')
-    TriggerServerEvent("roots-search:server:giveJobYourself", data)
-end)
-
-RegisterNUICallback('giveJob', function(data, cb)
-    --[[CreateThread(function()
-        local targetId = playerSelector(Config.Locale.giveCopy)
-        if targetId == -1 then
-            holdBag(false)
-        else
-            TriggerServerEvent("roots_search:giveJob", data, targetId)
-        end
-    end)]]
-    print('giveJob to Player triggered')
-    TriggerServerEvent("roots-search:server:giveJob", data)
+RegisterNUICallback('setJob', function(jobData, cb)
+    print('setJob to Player triggered')
+    TriggerServerEvent("roots-search:server:setJob", jobData)
 end)
 
 RegisterNetEvent('roots-search:client:jobGiven')
-AddEventHandler('roots-search:client:jobGiven', function(data)
---[[    holdBag(false)
-    playAnim("mp_common", "givetake1_a", 1500)]]
-    Notification(Config.Locale.giveNotification .. " " .. data)
+AddEventHandler('roots-search:client:jobGiven', function(msg)
+    --[[    holdBag(false)
+        playAnim("mp_common", "givetake1_a", 1500)]]
+    Notification(msg)
 end)
 
 RegisterNetEvent('roots-search:client:jobReceived')
-AddEventHandler('roots-search:client:jobReceived', function(data)
-    Notification(Config.Locale.receiveNotification .. " " .. data)
+AddEventHandler('roots-search:client:jobReceived', function(msg)
+    Notification(msg)
 end)
-
 
 if Config.RegisterKey then
     if Config.Command then

@@ -2,36 +2,36 @@ import { useCallback, useState } from "react"
 import { fetchNui } from "../../../utils/fetchNui"
 
 type Props = {
-  handleGetItems: () => void
-  setItemsLoading: (isLoading: boolean) => void
+  handleGetJobs: () => void
+  setJobsLoading: (isLoading: boolean) => void
 }
 
-const useEditJob = ({handleGetItems, setItemsLoading}: Props) => {
-  const [isItemOpen, setEditItemOpen] = useState(false)
-  const [itemToEdit, setItemToEdit] = useState<Item | undefined>()
+const useEditJob = ({handleGetJobs, setJobsLoading}: Props) => {
+  const [isJobOpen, setIsJobOpen] = useState(false)
+  const [jobToEdit, setJobToEdit] = useState<Job | undefined>()
   
-  const handleEditItem = useCallback(() => {
-    setEditItemOpen(false)
-    setItemsLoading(true)
-    fetchNui('updateItem', itemToEdit?.name).then(_retData => {
-      handleGetItems()
+  const handleEditJob = useCallback(() => {
+    setIsJobOpen(false)
+    setJobsLoading(true)
+    fetchNui('editJob', jobToEdit?.name).then(_retData => {
+      handleGetJobs()
       return
     }).catch(_e => {
       console.error('An error has occured', _e)
     })
     
-  }, [handleGetItems, setItemsLoading, itemToEdit])
+  }, [handleGetJobs, setJobsLoading, jobToEdit])
   const handleCancel = useCallback(() => {
-    setEditItemOpen(false)
-    setItemToEdit(undefined)
+    setIsJobOpen(false)
+    setJobToEdit(undefined)
   }, [])
 
   return {
-    isItemOpen,
-    setEditItemOpen,
-    itemToEdit,
-    setItemToEdit,
-    handleEditItem,
+    isJobOpen,
+    setIsJobOpen,
+    jobToEdit,
+    setJobToEdit,
+    handleEditJob,
     handleCancel
   }
 }

@@ -21,7 +21,7 @@ type Props = {
 const CreateDocument = ({ template, handleCreate, handleClose, logoSrc, isCitizen }: Props) => {
   
   const { playerData } = usePlayerData()
-  const { job } = useJob()
+  const { requiredJob } = useJob()
 
   const [isSigned, setSigned] = useState(false)
 
@@ -38,7 +38,7 @@ const CreateDocument = ({ template, handleCreate, handleClose, logoSrc, isCitize
         firstname: playerData?.firstname,
         lastname: playerData?.lastname,
         birthDate: moment(playerData?.dateofbirth, playerData?.dateformat).format(DATE_FORMAT_SHORT),
-        jobName: job?.label
+        jobName: requiredJob?.label
       }
     }
   });
@@ -57,7 +57,7 @@ const CreateDocument = ({ template, handleCreate, handleClose, logoSrc, isCitize
       name: data.name,
       createdAt: (new Date()).toString(),
       customName: data.customName?.length ? data.customName : undefined,
-      job: !isCitizen ? job?.name : undefined,
+      requiredJob: !isCitizen ? requiredJob?.name : undefined,
       description: data.description,
       fields: data.fields,
       isCopy: false,
@@ -67,7 +67,7 @@ const CreateDocument = ({ template, handleCreate, handleClose, logoSrc, isCitize
         firstname: playerData?.firstname,
         lastname: playerData?.lastname,
         birthDate: moment(playerData?.dateofbirth, playerData?.dateformat).format(DATE_FORMAT_SHORT),
-        jobName: !isCitizen ? job?.label : undefined
+        jobName: !isCitizen ? requiredJob?.label : undefined
       }
     } as K5Document
 
@@ -124,7 +124,7 @@ const CreateDocument = ({ template, handleCreate, handleClose, logoSrc, isCitize
                         <Typography style={{ fontSize: "0.9rem" }}>{moment(playerData?.dateofbirth, playerData?.dateformat).format(DATE_FORMAT_SHORT)}</Typography>
                       </Grid>
                       {!isCitizen ? <Grid item xs={6}>
-                        <Typography style={{ fontSize: "0.9rem" }}>{ job?.label }</Typography>
+                        <Typography style={{ fontSize: "0.9rem" }}>{ requiredJob?.label }</Typography>
                       </Grid> : <Grid item xs={6} />}
                       
                     </Grid>

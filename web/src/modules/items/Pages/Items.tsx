@@ -10,9 +10,9 @@ import {
 import {Box, Button, Checkbox, Dialog, Grid, IconButton, InputAdornment, TextField, Tooltip} from "@mui/material";
 import moment from "moment";
 import {DATE_FORMAT} from "../../../utils/consts";
-import {imagePrefix, texts} from "../../../AppConfig";
+import {itemImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
-import {Context} from "../../../context/Context";
+import {ItemContext} from "../context/ItemContext";
 import DeleteDialog from "../../general/components/DeleteDialog";
 import CreateEditItem from "../components/Forms/CreateEditItem";
 import EditIcon from "@mui/icons-material/Edit";
@@ -30,17 +30,17 @@ import GiveItemToPlayerDialog from "../components/GiveItemToPlayerDialog";
 
 const Items = () => {
         const {
-            jobs,
-            handleGetJobs,
-            jobsLoading,
-            setJobsLoading,
-            setViewJobOpen,
-            setViewJob,
+            items,
+            handleGetItems,
+            itemsLoading,
+            setItemsLoading,
+            setViewItemOpen,
+            setViewItem,
         /*    players,
             handleGetPlayers,
             playersLoading,
             setPlayersLoading*/
-        } = useContext(Context);
+        } = useContext(ItemContext);
 
 
         const {
@@ -50,7 +50,7 @@ const Items = () => {
             setItemToGive,
             handleGiveItem,
             handleGiveItemCancel
-        } = useGiveItem({handleGetJobs: handleGetItems, setJobsLoading: setItemsLoading})
+        } = useGiveItem({handleGetItems: handleGetItems, setItemsLoading: setItemsLoading})
 
         const {
             isGiveItemToPlayerOpen,
@@ -64,7 +64,7 @@ const Items = () => {
             handleGetPlayers,
             playersLoading,
             setPlayersLoading
-        } = useGiveItemToPlayer({handleGetJobs: handleGetItems, setJobsLoading: setItemsLoading})
+        } = useGiveItemToPlayer({handleGetItems: handleGetItems, setItemsLoading: setItemsLoading})
 
         const {
             isDeleteOpen,
@@ -73,7 +73,7 @@ const Items = () => {
             setItemToDelete,
             handleDelete,
             handleCancel
-        } = useDeleteItem({handleGetJobs: handleGetItems, setJobsLoading: setItemsLoading})
+        } = useDeleteItem({handleGetItems: handleGetItems, setItemsLoading: setItemsLoading})
 
 
         const [isItemFormOpen, setItemFormOpen] = useState(false)
@@ -84,8 +84,8 @@ const Items = () => {
         const [searchText, setSearchText] = useState('');
 
         useEffect(() => {
-            if (jobs === null) handleGetJobs();
-        }, [jobs, handleGetJobs]);
+            if (items === null) handleGetItems();
+        }, [items, handleGetItems]);
 
         /*useEffect(() => {
             if (players === null) handleGetPlayers();
@@ -100,48 +100,48 @@ const Items = () => {
         };
 
 
-        const filteredItems = jobs?.filter((item) =>
+        const filteredItems = items?.filter((item) =>
             item.name?.toLowerCase().includes(searchText.toLowerCase()) ||
             item.label?.toLowerCase().includes(searchText.toLowerCase())
         ) ?? [];
 
         const handleCreate = useCallback((data: Item) => {
             setItemFormOpen(false)
-            setJobsLoading(true)
+            setItemsLoading(true)
             console.log('handleCreate: useCallback createItem')
             console.log(JSON.stringify(data))
             fetchNui('createItem', JSON.stringify(data)).then(_retData => {
                 console.log('handleCreate: fetchNui createItem')
                 console.log(JSON.stringify(data))
-                handleGetJobs()
+                handleGetItems()
                 return
             }).catch(_e => {
                 console.error('An error has occured')
             })
 
-        }, [handleGetJobs, setJobsLoading])
+        }, [handleGetItems, setItemsLoading])
 
         const handleEdit = useCallback((data: Item) => {
             setItemFormOpen(false)
-            setJobsLoading(true)
+            setItemsLoading(true)
             console.log('handleEdit: useCallback editItem')
             console.log(JSON.stringify(data))
             fetchNui('editItem', JSON.stringify(data)).then(_retData => {
                 console.log('handleEdit: fetchNui editItem')
                 console.log(JSON.stringify(data))
-                handleGetJobs()
+                handleGetItems()
                 return
             }).catch(_e => {
                 console.error('An error has occured')
             })
 
-        }, [handleGetJobs, setJobsLoading])
+        }, [handleGetItems, setItemsLoading])
 
         const handleClose = useCallback(() => {
             setItemFormOpen(false)
-            setJobsLoading(true)
+            setItemsLoading(true)
             setCurrentItem(undefined)
-            handleGetJobs()
+            handleGetItems()
 
             /*console.log('handleEdit: useCallback')
             console.log(JSON.stringify(data))
@@ -154,7 +154,7 @@ const Items = () => {
                 console.error('An error has occured')
             })*/
 
-        }, [handleGetJobs, setJobsLoading])
+        }, [handleGetItems, setItemsLoading])
 
         const columns: GridColumns<Item> = [
             {
@@ -163,7 +163,7 @@ const Items = () => {
                 width: 75,
                 renderCell: (params: GridRenderCellParams<string>) => (
                     <img
-                        src={`${imagePrefix}${params.value}`}
+                        src={`${itemImagePrefix}${params.value}`}
                         alt="item"
                         style={{width: '50px', height: '50px', objectFit: 'contain'}}
                     />
@@ -173,16 +173,60 @@ const Items = () => {
                 field: 'label',
                 headerName: texts.itemLabel,
                 flex: 1,
+                renderCell: (params) => {
+                    const value = params.value;
+                    return (
+                        <Tooltip title={value} arrow>
+                    <span style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                        maxWidth: '100%',
+                    }}>
+                        {value}
+                    </span>
+                        </Tooltip>
+                    );
+                }
             },
             {
                 field: 'description',
                 headerName: texts.itemDescription,
                 flex: 2,
+                renderCell: (params) => {
+                    const value = params.value;
+                    return (
+                        <Tooltip title={value} arrow>
+                    <span style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                        maxWidth: '100%',
+                    }}>
+                        {value}
+                    </span>
+                        </Tooltip>
+                    );
+                }
             },
             {
                 field: 'weight',
                 headerName: texts.itemWeight,
                 flex: 1,
+                valueFormatter: (params) => {
+                    const weight = params.value;
+
+                    if (weight < 1000) {
+                        // Wenn das Gewicht unter 1000 ist, in Gramm anzeigen
+                        return `${weight} ${texts.itemWeightUnitG}`;
+                    } else {
+                        // Wenn das Gewicht 1000 oder mehr ist, in Kilogramm umrechnen und anzeigen
+                        const kg = (weight / 1000).toFixed(2); // auf 2 Dezimalstellen gerundet
+                        return `${kg} ${texts.itemWeightUnitKG}`;
+                    }
+                }
             },
             {
                 field: 'useable',
@@ -196,11 +240,31 @@ const Items = () => {
                 ),
             },
             {
-                field: 'created',
+                field: 'createDate',
                 headerName: texts.itemCreateTime,
-                width: 150,
-                valueGetter: (params: GridValueGetterParams) => (new Date(params.row.created)),
+                flex: 1,
+                valueGetter: (params: GridValueGetterParams) => (new Date(params.row.createDate)),
                 valueFormatter: params => moment(new Date(params?.value)).format(DATE_FORMAT),
+            },
+            {
+                field: 'modifiedDate',
+                headerName: texts.itemModifiedTime,
+                flex: 1,
+                valueGetter: (params: GridValueGetterParams) => {
+                    const dateValue = params.row.modifiedDate;
+                    return dateValue === 0 ? null : new Date(dateValue);
+                },
+                valueFormatter: (params) => {
+                    if (!params.value) {
+                        return 'N/A';
+                    }
+                    return moment(new Date(params.value)).format(DATE_FORMAT);
+                },
+            },
+            {
+                field: 'lastTouched',
+                headerName: texts.itemModifiedBy,
+                flex: 1
             },
             {
                 field: 'playerActions',
@@ -209,17 +273,14 @@ const Items = () => {
                 getActions: (data: GridRowParams) => [
                     (<Tooltip title={texts.giveYourself}>
                         <GridActionsCellItem icon={<MedicalServicesIcon/>} onClick={() => {
-                            setItemToGive(jobs?.filter(t => t.name === data.id)[0])
+                            setItemToGive(items?.filter(t => t.name === data.id)[0])
                             setGiveItemOpen(true)
                         }} label={texts.giveYourself}/>
                     </Tooltip>),
                     (<Tooltip title={texts.givePlayer}>
                         <GridActionsCellItem icon={<PersonAddAlt1Icon/>} onClick={() => {
-                            setItemToGiveToPlayer(jobs?.filter(t => t.name === data.id)[0])
-                            setPlayersLoading(true)
+                            setItemToGiveToPlayer(items?.filter(t => t.name === data.id)[0])
                             handleGetPlayers()
-                            setPlayers(players)
-                            setPlayersLoading(false)
                             setGiveItemToPlayerOpen(true)
                         }} label={texts.givePlayer}/>
                     </Tooltip>),
@@ -233,13 +294,13 @@ const Items = () => {
                 getActions: (data: GridRowParams) => [
                     (<Tooltip title={texts.edit}>
                         <GridActionsCellItem icon={<EditIcon/>} onClick={() => {
-                            setCurrentItem(jobs?.filter(t => t.name === data.id)[0])
+                            setCurrentItem(items?.filter(t => t.name === data.id)[0])
                             setItemFormOpen(true)
                         }} label={texts.edit}/>
                     </Tooltip>),
                     (<Tooltip title={texts.delete}>
                         <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => {
-                            setItemToDelete(jobs?.filter(t => t.name === data.id)[0])
+                            setItemToDelete(items?.filter(t => t.name === data.id)[0])
                             setDeleteOpen(true)
                         }} label={texts.delete}/>
                     </Tooltip>),
@@ -291,7 +352,7 @@ const Items = () => {
                     <DataGrid
                         rows={filteredItems}
                         columns={columns}
-                        loading={jobsLoading}
+                        loading={itemsLoading}
                         pageSize={pageSize}
                         initialState={{
                             sorting: {sortModel: [{field: "label", sort: 'asc'}]}
@@ -310,7 +371,7 @@ const Items = () => {
                     setItemFormOpen(false)
                     setCurrentItem(undefined)
                 }}>
-                    <CreateEditItem items={jobs} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
+                    <CreateEditItem items={items} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
                                     itemData={currentItem}/>
                 </Dialog>
                 <GiveItemDialog

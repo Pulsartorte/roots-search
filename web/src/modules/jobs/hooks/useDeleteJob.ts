@@ -28,7 +28,7 @@ const useDeleteJob = ({handleGetJobs, setJobsLoading}: Props) => {
   return {
     isDeleteOpen,
     setDeleteOpen,
-    itemToDelete: jobToDelete,
+    jobToDelete: jobToDelete,
     setItemToDelete: setJobToDelete,
     handleDelete,
     handleCancel

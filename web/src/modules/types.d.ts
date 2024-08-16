@@ -35,6 +35,13 @@ declare type Item = {
   ammotype?: string;
 }
 
+declare type Grade = {
+  name: string;
+  payment: number;
+  isboss?: boolean;
+  order: number;
+}
+
 declare type Job = {
   name: string; // VARCHAR(50) NOT NULL
   label: string; // VARCHAR(100) NOT NULL
@@ -42,12 +49,8 @@ declare type Job = {
   defaultDuty: boolean; // TINYINT(1) DEFAULT 0 (0 oder 1 wird als boolean interpretiert)
   offDutyPay: boolean; // TINYINT(1) DEFAULT 0 (0 oder 1 wird als boolean interpretiert)
   grades: Grade[]; // TINYINT(1) DEFAULT 0 (0 oder 1 wird als boolean interpretiert)
-}
-
-declare type Grade = {
-  name: string;
-  payment: number;
-  isBoss: boolean;
+  minPayment: number;
+  maxPayment: number;
 }
 
 declare type K5Document = {

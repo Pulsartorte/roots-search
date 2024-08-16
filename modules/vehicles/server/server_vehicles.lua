@@ -110,14 +110,6 @@ RegisterCallback('roots-search:server:deleteVehicle', function(source, cb, data)
     end)
 end)
 
-RegisterCallback('roots-search:server:getPlayers', function(source, cb)
-    print('roots-search:server:getPlayers triggered, returning all online players')
-    -- TODO build players ID, Firstname, Lastname
-    local players = GetQBPlayers()
-    cb(players)
-end)
-
-
 RegisterServerEvent('roots-search:server:giveVehicleYourself')
 AddEventHandler('roots-search:server:giveVehicleYourself', function(data)
     local playerId = source

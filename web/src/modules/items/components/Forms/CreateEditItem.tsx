@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadIcon from '@mui/icons-material/Upload';
 import {Controller, SubmitHandler, useFieldArray, useForm} from "react-hook-form";
-import {imagePrefix, texts} from "../../../../AppConfig";
+import {itemImagePrefix, texts} from "../../../../AppConfig";
 import items from "../../Pages/Items";
 import React, {useEffect, useState} from "react";
 import {Image} from "@mui/icons-material";
@@ -59,7 +59,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
         return `${key}${variable}`;
     };
 
-    const imageUrl = getTextWithVariable(imagePrefix, itemData?.image || '');
+    const imageUrl = getTextWithVariable(itemImagePrefix, itemData?.image || '');
 
     // Log the form values and errors
     const formValues = watch();

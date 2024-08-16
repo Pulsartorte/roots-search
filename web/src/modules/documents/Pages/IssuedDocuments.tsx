@@ -8,7 +8,7 @@ import ShowIcon from '@mui/icons-material/UploadFile';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import DeleteDialog from "../../general/components/DeleteDialog"
 import city_logo from "../../../assets/city_logo.png"
-import { Context } from "../../../context/Context"
+import { DocumentContext } from "../context/DocumentContext"
 import useDeleteDocument from "../hooks/useDeleteDocument"
 import CreateDocumentModal from "../components/CreateDocumentModal"
 import CreateDocument from "../components/Forms/CreateDocument"
@@ -26,7 +26,7 @@ const IssuedDocuments = () => {
   const [isCitizenListOpen, setCitizenListOpen] = useState(false)
   const [logoSrc, setLogoSrc] = useState(city_logo)
   const [documentTemplate, setDocumentTemplate] = useState<DocumentTemplate | undefined>()
-  const { job } = useJob()
+  const { requiredJob } = useJob()
 
   const {
     documents,
@@ -35,7 +35,7 @@ const IssuedDocuments = () => {
     setDocumentsLoading,
     setViewDocOpen,
     setViewDocument
-  } = useContext(Context)
+  } = useContext(DocumentContext)
 
   useEffect(() => {
     documents === null && handleGetDocuments()
@@ -122,7 +122,7 @@ const IssuedDocuments = () => {
       setLogoSrc(city_logo)
       setCitizenDocument(true)
     } else {
-      setLogoSrc(availableJobs.find(j => j.job === job?.name)?.logo || city_logo)
+      setLogoSrc(availableJobs.find(j => j.job === requiredJob?.name)?.logo || city_logo)
       setCitizenDocument(false)
     }
     

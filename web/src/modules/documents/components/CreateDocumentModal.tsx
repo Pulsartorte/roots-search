@@ -15,18 +15,18 @@ type Props = {
 
 const CreateDocumentModal = ({ open, handleClose, handleTemplateClick, citizen}: Props) => {
   const { templates, handleGetTemplates } = useContext(Context)
-  const { job } = useJob()
+  const { requiredJob } = useJob()
 
   const availableTempaltes = useMemo(() => {
     return templates?.filter(t => {
       if (!t.minGrade) {
         return true
-      } else if (t.minGrade <= job?.grade!) {
+      } else if (t.minGrade <= requiredJob?.grade!) {
         return true
       }
       return false
     })
-  },[job?.grade, templates])
+  },[requiredJob?.grade, templates])
 
   useEffect(() => {
     handleGetTemplates()

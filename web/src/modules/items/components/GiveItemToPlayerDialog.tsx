@@ -24,21 +24,13 @@ type Props = {
 
 const GiveItemToPlayerDialog = ({open, handleAgree, handleCancel, title, text, players, playersLoading}: Props) => {
     const [quantity, setQuantity] = useState<number>(1);
-    const [playerId , setPlayerId] = useState<number | 1>(1);
-    const [selectedPlayerName , setSelectedPlayerName] = useState<string | ''>('');
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-
-/*    useEffect(() => {
-        if (players === null) handleGetPlayers();
-        setPlayers(players)
-    }, [players, handleGetPlayers]);*/
 
     const handleAgreeClick = () => {
         if (quantity >= 1 && selectedPlayer != undefined)  {
             handleAgree(quantity, selectedPlayer);
             setQuantity(1);  // Clear the input after agree
             setSelectedPlayer(null)
-            setPlayerId(1); // Clear the player Id after agree
         }
     };
 
