@@ -6,11 +6,12 @@ import {
     DialogActions,
     Button,
     TextField,
-    Typography, IconButton, CircularProgress, Autocomplete
+    Typography, IconButton, CircularProgress, Autocomplete, Avatar
 } from "@mui/material"
-import {texts} from "../../../AppConfig"
+import {itemImagePrefix, texts} from "../../../AppConfig"
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import {Box} from "@mui/system";
 
 type Props = {
     open: boolean,
@@ -20,36 +21,65 @@ type Props = {
     playersLoading: boolean
     title: string,
     text: string,
+    itemData: Item | undefined
 }
 
-const GiveItemToPlayerDialog = ({open, handleAgree, handleCancel, title, text, players, playersLoading}: Props) => {
+const GiveItemToPlayerDialog = ({
+                                    open,
+                                    handleAgree,
+                                    handleCancel,
+                                    title,
+                                    text,
+                                    players,
+                                    playersLoading,
+                                    itemData
+                                }: Props) => {
     const [quantity, setQuantity] = useState<number>(1);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     const handleAgreeClick = () => {
-        if (quantity >= 1 && selectedPlayer != undefined)  {
+        if (quantity >= 1 && selectedPlayer != undefined) {
             handleAgree(quantity, selectedPlayer);
             setQuantity(1);  // Clear the input after agree
             setSelectedPlayer(null)
         }
     };
 
+    const getTextWithVariable = (key: string, variable: string) => {
+        return `${key}${variable}`;
+    };
+
+    const itemImageUrl = getTextWithVariable(itemImagePrefix, itemData?.image || '');
+
     return (
         <Dialog
             open={open}
             onClose={handleCancel}
+            style={{ minWidth: '400px' }}
         >
             <DialogTitle>
-                <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
-                    {texts.giveItemTitle}
-                </Typography>
-
-                <IconButton
-                    style={{position: 'absolute', top: "1vh", right: "1vh"}}
-                    onClick={handleCancel}
-                >
-                    <CloseIcon/>
-                </IconButton>
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Box display="flex" alignItems="center">
+                        <Avatar
+                            src={itemImageUrl}
+                            alt={itemData?.image}
+                            style={{
+                                width: '50px',
+                                height: '50px',
+                                marginRight: '10px'
+                            }} // marginRight für Abstand zum Text
+                        />
+                        <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
+                            {`${title} ${texts.jobEdit}`}
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        style={{position: 'absolute', top: "1vh", right: "1vh"}}
+                        onClick={handleCancel}
+                    >
+                        <CloseIcon/>
+                    </IconButton>
+                </Box>
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>

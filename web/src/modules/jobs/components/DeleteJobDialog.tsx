@@ -5,39 +5,33 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-  TextField,
-  Typography, IconButton, Avatar
+  Avatar,
+  Typography, IconButton
 } from "@mui/material"
 import {itemImagePrefix, texts} from "../../../AppConfig"
-import React, {useState} from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import {Controller} from "react-hook-form";
 import {Box} from "@mui/system";
+import CloseIcon from "@mui/icons-material/Close";
+import React from "react";
 
 type Props = {
   open: boolean
-  handleAgree: (quantity: number) => void
+  handleAgree: () => void
   handleCancel: () => void
   title: string
   text: string
-  itemData: Item | undefined
+  jobData: Job | undefined
 }
 
-const GiveItemDialog = ({open, handleAgree, handleCancel, title, text, itemData,}: Props) => {
-  const [quantity, setQuantity] = useState<number>(1);
 
-  const handleAgreeClick = () => {
-    if (quantity >= 1) {
-      handleAgree(quantity);
-      setQuantity(1);  // Clear the input after agree
-    }
-  };
+
+const DeleteJobDialog = ({open, handleAgree, handleCancel, title, text, jobData}: Props) => {
 
   const getTextWithVariable = (key: string, variable: string) => {
     return `${key}${variable}`;
   };
 
-  const itemImageUrl = getTextWithVariable(itemImagePrefix, itemData?.image || '');
+  const serviceImageUrl = getTextWithVariable(itemImagePrefix, jobData?.name || '');
+
 
   return (
     <Dialog
@@ -49,8 +43,8 @@ const GiveItemDialog = ({open, handleAgree, handleCancel, title, text, itemData,
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <Box display="flex" alignItems="center">
             <Avatar
-                src={itemImageUrl}
-                alt={itemData?.image}
+                src={serviceImageUrl}
+                alt={jobData?.name}
                 style={{
                   width: '50px',
                   height: '50px',
@@ -71,23 +65,17 @@ const GiveItemDialog = ({open, handleAgree, handleCancel, title, text, itemData,
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <div dangerouslySetInnerHTML={{ __html: text }} style={{marginBottom: "1vh"}}/>
-          <TextField
-              autoFocus
-              margin="dense"
-              label={texts.itemQuantityToGive}
-              type="number"
-              fullWidth
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value === '' ? 1 : Number(e.target.value))}
-          />
+          <div dangerouslySetInnerHTML={{ __html: text }} />
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="success" onClick={handleAgreeClick} autoFocus fullWidth >{texts.giveInventory}</Button>
+        <Button onClick={handleAgree} autoFocus>{texts.delete}</Button>
+        <Button onClick={handleCancel} >
+          {texts.cancel}
+        </Button>
       </DialogActions>
     </Dialog>
   )
 }
 
-export default GiveItemDialog
+export default DeleteJobDialog

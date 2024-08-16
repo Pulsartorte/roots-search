@@ -13,7 +13,7 @@ import {DATE_FORMAT} from "../../../utils/consts";
 import {itemImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
 import {ItemContext} from "../context/ItemContext";
-import DeleteDialog from "../../general/components/DeleteDialog";
+import DeleteItemDialog from "../components/DeleteItemDialog";
 import CreateEditItem from "../components/Forms/CreateEditItem";
 import EditIcon from "@mui/icons-material/Edit";
 import useDeleteItem from "../hooks/useDeleteItem";
@@ -379,7 +379,9 @@ const Items = () => {
                     handleAgree={handleGiveItem}
                     handleCancel={handleGiveItemCancel}
                     title={`${itemToGive?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}/>
+                    text={`<strong>${texts.giveItemQuestion}`}
+                    itemData={itemToGive}
+                />
                 <GiveItemToPlayerDialog
                     open={isGiveItemToPlayerOpen}
                     handleAgree={handleGiveItemToPlayer}
@@ -387,13 +389,17 @@ const Items = () => {
                     players={players}
                     playersLoading={playersLoading}
                     title={`${itemToGiveToPlayer?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}/>
-                <DeleteDialog
+                    text={`<strong>${texts.giveItemQuestion}`}
+                    itemData={itemToGiveToPlayer}
+                />
+                <DeleteItemDialog
                     open={isDeleteOpen}
                     handleAgree={handleDelete}
                     handleCancel={handleCancel}
                     title={`${itemToDelete?.label || ""}`}
-                    text={`<strong>${texts.deleteItemQuestion}`}/>
+                    text={`<strong>${texts.deleteItemQuestion}`}
+                    itemData={currentItem}
+                />
             </>
         );
     }

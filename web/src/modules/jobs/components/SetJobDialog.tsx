@@ -6,11 +6,12 @@ import {
     DialogActions,
     Button,
     TextField,
-    Typography, IconButton, Autocomplete, CircularProgress, FormControlLabel, Checkbox, Tooltip
+    Typography, IconButton, Autocomplete, CircularProgress, FormControlLabel, Checkbox, Tooltip, Avatar
 } from "@mui/material"
-import {texts} from "../../../AppConfig"
+import {itemImagePrefix, texts} from "../../../AppConfig"
 import React, {useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import {Box} from "@mui/system";
 
 type Props = {
     open: boolean
@@ -20,9 +21,10 @@ type Props = {
     text: string
     grades: Grade[]
     gradesLoading: boolean
+    jobData: Job | undefined
 }
 
-const SetJobDialog = ({open, handleAgree, handleCancel, title, text, grades, gradesLoading}: Props) => {
+const SetJobDialog = ({open, handleAgree, handleCancel, title, text, grades, gradesLoading, jobData}: Props) => {
     const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
     const [isMultiJob, setIsMultiJob] = useState(false);
 
@@ -48,22 +50,41 @@ const SetJobDialog = ({open, handleAgree, handleCancel, title, text, grades, gra
         console.log(selectedGrade)
     }
 
+    const getTextWithVariable = (key: string, variable: string) => {
+        return `${key}${variable}`;
+    };
+
+    const serviceImageUrl = getTextWithVariable(itemImagePrefix, jobData?.name || '');
+
     return (
         <Dialog
             open={open}
             onClose={handleCancelClick}
+            style={{ minWidth: '400px' }}
         >
             <DialogTitle>
-                <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
-                    {texts.setJobTitle}
-                </Typography>
-
-                <IconButton
-                    style={{position: 'absolute', top: "1vh", right: "1vh"}}
-                    onClick={handleCancelClick}
-                >
-                    <CloseIcon/>
-                </IconButton>
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Box display="flex" alignItems="center">
+                        <Avatar
+                            src={serviceImageUrl}
+                            alt={jobData?.name}
+                            style={{
+                                width: '50px',
+                                height: '50px',
+                                marginRight: '10px'
+                            }} // marginRight für Abstand zum Text
+                        />
+                        <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
+                            {`${title} ${texts.jobEdit}`}
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        style={{position: 'absolute', top: "1vh", right: "1vh"}}
+                        onClick={handleCancelClick}
+                    >
+                        <CloseIcon/>
+                    </IconButton>
+                </Box>
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>

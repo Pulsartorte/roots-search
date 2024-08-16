@@ -13,7 +13,7 @@ import {DATE_FORMAT} from "../../../utils/consts";
 import {jobImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
 import {JobContext} from "../context/JobContext";
-import DeleteDialog from "../../general/components/DeleteDialog";
+import DeleteJobDialog from "../components/DeleteJobDialog";
 import CreateEditJob from "../components/Forms/CreateEditJob";
 import EditIcon from "@mui/icons-material/Edit";
 import useDeleteJob from "../hooks/useDeleteJob";
@@ -404,6 +404,7 @@ const Jobs = () => {
                     text={`<strong>${texts.setJobQuestion}`}
                     grades={grades}
                     gradesLoading={jobsLoading}
+                    jobData={jobToSet}
                 />
                 <SetJobToPlayerDialog
                     open={isSetJobToPlayerOpen}
@@ -414,13 +415,17 @@ const Jobs = () => {
                     grades={gradesPlayer}
                     gradesLoading={jobsLoading}
                     title={`${jobToSetToPlayer?.label || ""}`}
-                    text={`<strong>${texts.setJobToPlayerQuestion}`}/>
-                <DeleteDialog
+                    text={`<strong>${texts.setJobToPlayerQuestion}`}
+                    jobData={jobToSetToPlayer}
+                />
+                <DeleteJobDialog
                     open={isDeleteOpen}
                     handleAgree={handleDelete}
                     handleCancel={handleCancel}
                     title={`${jobToDelete?.label || ""}`}
-                    text={`<strong>${texts.deleteJobQuestion}`}/>
+                    text={`<strong>${texts.deleteJobQuestion}`}
+                    jobData={currentJob}
+                />
             </>
         );
     }

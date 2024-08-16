@@ -6,11 +6,12 @@ import {
     DialogActions,
     Button,
     TextField,
-    Typography, IconButton, CircularProgress, Autocomplete, FormControlLabel, Checkbox, Tooltip
+    Typography, IconButton, CircularProgress, Autocomplete, FormControlLabel, Checkbox, Tooltip, Avatar
 } from "@mui/material"
-import {texts} from "../../../AppConfig"
+import {itemImagePrefix, texts} from "../../../AppConfig"
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import {Box} from "@mui/system";
 
 type Props = {
     open: boolean,
@@ -22,6 +23,7 @@ type Props = {
     gradesLoading: boolean
     title: string,
     text: string,
+    jobData: Job | undefined
 }
 
 const SetJobToPlayerDialog = ({
@@ -33,7 +35,8 @@ const SetJobToPlayerDialog = ({
                                   grades,
                                   gradesLoading,
                                   players,
-                                  playersLoading
+                                  playersLoading,
+                                  jobData
                               }: Props) => {
     const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -64,22 +67,41 @@ const SetJobToPlayerDialog = ({
         console.log(selectedGrade)
     }
 
+    const getTextWithVariable = (key: string, variable: string) => {
+        return `${key}${variable}`;
+    };
+
+    const serviceImageUrl = getTextWithVariable(itemImagePrefix, jobData?.name || '');
+
     return (
         <Dialog
             open={open}
             onClose={handleCancelClick}
+            style={{minWidth: '400px'}}
         >
             <DialogTitle>
-                <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
-                    {texts.setJobTitle}
-                </Typography>
-
-                <IconButton
-                    style={{position: 'absolute', top: "1vh", right: "1vh"}}
-                    onClick={handleCancelClick}
-                >
-                    <CloseIcon/>
-                </IconButton>
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Box display="flex" alignItems="center">
+                        <Avatar
+                            src={serviceImageUrl}
+                            alt={jobData?.name}
+                            style={{
+                                width: '50px',
+                                height: '50px',
+                                marginRight: '10px'
+                            }} // marginRight für Abstand zum Text
+                        />
+                        <Typography variant="h5" gutterBottom style={{marginBottom: "1vh"}}>
+                            {`${title} ${texts.jobEdit}`}
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        style={{position: 'absolute', top: "1vh", right: "1vh"}}
+                        onClick={handleCancelClick}
+                    >
+                        <CloseIcon/>
+                    </IconButton>
+                </Box>
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>
@@ -140,7 +162,7 @@ const SetJobToPlayerDialog = ({
                     />
                     {/* Add Multijob */}
                     <Tooltip
-                        title={<span style={{ fontSize: '1.2rem' }}>{texts.isMultiJobTooltip}</span>} // Der Tooltip-Text
+                        title={<span style={{fontSize: '1.2rem'}}>{texts.isMultiJobTooltip}</span>} // Der Tooltip-Text
                         arrow // Optional: zeigt einen Pfeil unterhalb des Tooltips
                     >
                         <FormControlLabel
