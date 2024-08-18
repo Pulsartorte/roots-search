@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadIcon from '@mui/icons-material/Upload';
 import {Controller, SubmitHandler, useFieldArray, useForm} from "react-hook-form";
-import {itemImagePrefix, texts} from "../../../../AppConfig";
+import {debugMode, itemImagePrefix, texts} from "../../../../AppConfig";
 import items from "../../Pages/Items";
 import React, {useEffect, useState} from "react";
 import {Image} from "@mui/icons-material";
@@ -63,15 +63,17 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
 
     // Log the form values and errors
     const formValues = watch();
-    useEffect(() => {
-        console.log('Form Values:', formValues);
-        console.log('Form Errors:', errors);
-    }, [formValues, errors]);
+    if (debugMode){
+        useEffect(() => {
+            console.log('Form Values:', formValues);
+            console.log('Form Errors:', errors);
+        }, [formValues, errors]);
+    }
 
     const validateName = (name: string) => {
         const nameExists = items?.some(item => item.name.toLowerCase() === name.toLowerCase());
         if (nameExists) {
-            return 'Name ist bereits vergeben!';
+            return texts.nameAlreadyExists;
         } else {
             return true;
         }
@@ -291,7 +293,7 @@ const CreateEditItem = ({items, itemData, handleCreate, handleEdit, handleClose}
                     </Grid>
                     <Grid container justifyContent="center" style={{marginTop: "1.5vh"}}>
                         <Button type="submit" variant="contained" color="success" fullWidth>
-                            {itemData ? texts.editItemBtn : texts.createItemBtn}
+                            {itemData ? texts.editItemBtn : texts.saveCreateItemBtn}
                         </Button>
                     </Grid>
 

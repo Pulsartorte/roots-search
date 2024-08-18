@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadIcon from '@mui/icons-material/Upload';
 import {Controller, SubmitHandler, useFieldArray, useForm} from "react-hook-form";
-import {jobImagePrefix, texts} from "../../../../AppConfig";
+import {debugMode, jobImagePrefix, texts} from "../../../../AppConfig";
 import jobs from "../../Pages/Jobs";
 import React, {useCallback, useEffect, useState} from "react";
 import {Image} from "@mui/icons-material";
@@ -102,10 +102,13 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
 
     // Log the form values and errors
     const formValues = watch();
-    useEffect(() => {
-        console.log('Form Values:', formValues);
-        console.log('Form Errors:', errors);
-    }, [formValues, errors]);
+    if (debugMode){
+        useEffect(() => {
+            console.log('Form Values:', formValues);
+            console.log('Form Errors:', errors);
+        }, [formValues, errors]);
+    }
+
 
     const validateName = (name: string) => {
         const nameExists = jobs?.some(item => item.name.toLowerCase() === name.toLowerCase());
@@ -151,8 +154,8 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                             <CloseIcon/>
                         </IconButton>
                     </Box>
-                    <Grid container spacing={2} width="100%">
-                        <Grid item xs={6}>
+                    <Grid container width="100%">
+                        <Grid item xs={6} style={{ padding: 16 }}>
                             <Controller
                                 name="name"
                                 control={control}
@@ -161,7 +164,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                     validate: !isEditMode ? validateName : undefined
                                 }}
                                 render={({field}) => (
-                                    <TextField
+                                    <JobTextField
                                         {...field}
                                         label={texts.jobName}
                                         error={!!errors.name}
@@ -179,12 +182,12 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={6} style={{ padding: 16 }}>
                             <Controller
                                 name="label"
                                 control={control}
                                 render={({field}) => (
-                                    <TextField
+                                    <JobTextField
                                         {...field}
                                         label={texts.jobLabel}
                                         error={!!errors.label}
@@ -195,7 +198,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={6} style={{ padding: 16 }}>
                             <Controller
                                 name="type"
                                 control={control}
@@ -216,7 +219,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={3} style={{ padding: 16 }}>
                             <Controller
                                 name="defaultDuty"
                                 control={control}
@@ -229,7 +232,7 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={3} style={{ padding: 16 }}>
                             <Controller
                                 name="offDutyPay"
                                 control={control}
@@ -242,7 +245,9 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                    </Grid>
+                    <Grid container width="100%">
+                        <Grid item xs={12} style={{ padding: 16 }}>
                             <Typography variant="h6" gutterBottom>
                                 {texts.jobGrades} {/* Titel über der Trennlinie */}
                             </Typography>
@@ -266,69 +271,69 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                                                         item
                                                         container
                                                         xs={12}
-                                                        spacing={2}
+                                                        style={{ padding: 16 }}
                                                         alignItems="center"
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                     >
-                                                        <Paper elevation={1} style={{ padding: '16px', width: '100%', display: 'flex', flexDirection: 'column' }}>
-                                                           <Grid container alignItems="center" spacing={2}>
-                                                            {/* Drag Handle Icon */}
-                                                           {/* <Grid item xs={1}  style={{ display: 'flex', justifyContent: 'center' }}>
+                                                        <Paper elevation={1} style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                                                            <Grid container alignItems="center" >
+                                                                {/* Drag Handle Icon */}
+                                                                {/* <Grid item xs={1}  style={{ display: 'flex', justifyContent: 'center' }}>
                                                                 <DragIndicatorIcon
                                                                     {...provided.dragHandleProps}
                                                                     style={{ cursor: 'grab', zIndex: 10 }}
                                                                 />
                                                             </Grid>*/}
-                                                               <Grid item xs={1}>
-                                                                   <div {...provided.dragHandleProps} style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                       <DragIndicatorIcon style={{ cursor: 'grab' }} />
-                                                                   </div>
-                                                               </Grid>
-                                                            <Grid item xs={4}>
-                                                                <JobTextField
-                                                                    style={{width: "100%"}}
-                                                                    size="small"
-                                                                    label={texts.jobName}
-                                                                    error={!!errors?.grades?.[i]?.name}
-                                                                    helperText={errors?.grades?.[i]?.name?.message as string}
-                                                                    {...register(`grades.${i}.name`)}
-                                                                />
+                                                                <Grid item xs={1} style={{ padding: '0 16px 0 16px' }}>
+                                                                    <div {...provided.dragHandleProps} style={{ display: 'flex', justifyContent: 'center' }}>
+                                                                        <DragIndicatorIcon style={{ cursor: 'grab' }} />
+                                                                    </div>
+                                                                </Grid>
+                                                                <Grid item xs={4} style={{ padding: '0 16px 0 16px ' }}>
+                                                                    <JobTextField
+                                                                        style={{width: "100%"}}
+                                                                        size="small"
+                                                                        label={texts.jobName}
+                                                                        error={!!errors?.grades?.[i]?.name}
+                                                                        helperText={errors?.grades?.[i]?.name?.message as string}
+                                                                        {...register(`grades.${i}.name`)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={4} style={{ padding: '0 16px 0 16px' }}>
+                                                                    <JobTextField
+                                                                        style={{width: "100%"}}
+                                                                        size="small"
+                                                                        label={texts.jobPayment}
+                                                                        type="number"
+                                                                        error={!!errors?.grades?.[i]?.payment}
+                                                                        helperText={errors?.grades?.[i]?.payment?.message as string}
+                                                                        {...register(`grades.${i}.payment`)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={2} style={{  padding: '0 16px 0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    <Controller
+                                                                        name={`grades.${i}.isboss`}
+                                                                        control={control}
+                                                                        render={({field}) => (
+                                                                            <FormControlLabel
+                                                                                control={
+                                                                                    <Checkbox
+                                                                                        {...field}
+                                                                                        checked={field.value || false}
+                                                                                    />
+                                                                                }
+                                                                                label={texts.jobIsBoss}
+                                                                            />
+                                                                        )}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={1} style={{  padding: '0 16px 0 16px', display: 'flex', justifyContent: 'center' }}>
+                                                                    <IconButton onClick={() => remove(i)}>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </Grid>
                                                             </Grid>
-                                                            <Grid item xs={4}>
-                                                                <JobTextField
-                                                                    style={{width: "100%"}}
-                                                                    size="small"
-                                                                    label={texts.jobPayment}
-                                                                    type="number"
-                                                                    error={!!errors?.grades?.[i]?.payment}
-                                                                    helperText={errors?.grades?.[i]?.payment?.message as string}
-                                                                    {...register(`grades.${i}.payment`)}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Controller
-                                                                    name={`grades.${i}.isboss`}
-                                                                    control={control}
-                                                                    render={({field}) => (
-                                                                        <FormControlLabel
-                                                                            control={
-                                                                                <Checkbox
-                                                                                    {...field}
-                                                                                    checked={field.value || false}
-                                                                                />
-                                                                            }
-                                                                            label={texts.jobIsBoss}
-                                                                        />
-                                                                    )}
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={1} style={{ display: 'flex', justifyContent: 'center' }}>
-                                                                <IconButton onClick={() => remove(i)}>
-                                                                    <DeleteIcon/>
-                                                                </IconButton>
-                                                            </Grid>
-                                                           </Grid>
                                                         </Paper>
                                                     </Grid>
                                                 )}
@@ -353,9 +358,10 @@ const CreateEditJob = ({jobs, jobData, handleCreate, handleEdit, handleClose,}: 
                             </Grid>
                         )}
                     </Grid>
+                    <Divider style={{marginBottom: "16px"}}/> {/* Trennlinie */}
                     <Grid container justifyContent="center" style={{marginTop: "1.5vh"}}>
                         <Button type="submit" variant="contained" color="success" fullWidth>
-                            {jobData ? texts.editJobBtn : texts.createJobBtn}
+                            {jobData ? texts.editJobBtn : texts.saveCreateJobBtn}
                         </Button>
                     </Grid>
                 </Box>
@@ -375,6 +381,32 @@ const StyledDocument = styled("div")`
     padding: 1.8vh;
 
 `
+const CustomScrollContainer = styled("div")`
+  height: 100%;
+  overflow-y: auto;
+
+  /* Dynamische Scrollbar Styles basierend auf dem Theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.palette.background.paper}; /* Dynamische Track-Farbe */
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: ${({ theme }) => theme.palette.primary.main}; /* Dynamische Thumb-Farbe */
+    border-radius: 10px;
+    border: 2px solid ${({ theme }) => theme.palette.background.paper}; /* Dynamischer Rand */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: ${({ theme }) => theme.palette.primary.dark}; /* Dynamische Hover-Farbe */
+  }
+`;
+
 
 const JobTextField = styled(TextField)`
     width: 100%;

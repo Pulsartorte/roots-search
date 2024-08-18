@@ -15,22 +15,19 @@ const useGiveItemToPlayer = ({handleGetItems,setItemsLoading,}: Props) => {
   const [playersLoading, setPlayersLoading] = useState(false)
 
   const handleGetPlayers = useCallback(() => {
-    setPlayersLoading(true);  // Ladezustand starten
-
-    fetchNui('getPlayers')
-        .then(retData => {
-          if (debugMode){
-            console.log('Received players from server:', retData);
-          }
-          setPlayers(retData);  // Spieler in den Zustand setzen
-        })
-        .catch(error => {
-          console.error('An error has occurred:', error);
-        })
-        .finally(() => {
-          setPlayersLoading(false);  // Ladezustand beenden
-        });
-  }, []);  // Hier brauchst du handleGetPlayers nicht in Abhängigkeiten, da es sich selbst enthält
+    setPlayersLoading(true)
+    fetchNui('getPlayers').then(retData => {
+      if (debugMode){
+        console.log('Received players from server:', retData);
+      }
+      setPlayersLoading(false)
+      setPlayers(retData)
+      console.log(players.toString())
+      return;
+    }).catch(_e => {
+      console.error('An error has occured')
+    })
+  }, [])
 
  /* useEffect(() => {
     if (players === null) handleGetPlayers();

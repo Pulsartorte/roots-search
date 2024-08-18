@@ -1,16 +1,28 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
+import {deDE as coreDeDE} from '@mui/material/locale';
 import {
-    DataGrid,
+    DataGrid, deDE as dataGridDeDE,
     GridActionsCellItem,
     GridColumns,
     GridRenderCellParams,
-    GridRowParams,
+    GridRowParams, GridRowSpacing, GridRowSpacingParams,
     GridValueGetterParams
 } from "@mui/x-data-grid";
-import {Box, Button, Checkbox, Dialog, Grid, IconButton, InputAdornment, TextField, Tooltip} from "@mui/material";
+import {
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    Grid,
+    IconButton,
+    InputAdornment,
+    TextField,
+    Tooltip,
+    styled
+} from "@mui/material";
 import moment from "moment";
 import {DATE_FORMAT} from "../../../utils/consts";
-import {itemImagePrefix, texts} from "../../../AppConfig";
+import {debugMode, itemImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
 import {ItemContext} from "../context/ItemContext";
 import DeleteItemDialog from "../components/DeleteItemDialog";
@@ -27,6 +39,7 @@ import useGiveItem from "../hooks/useGiveItem";
 import GiveItemDialog from "../components/GiveItemDialog";
 import useGiveItemToPlayer from "../hooks/useGiveItemToPlayer";
 import GiveItemToPlayerDialog from "../components/GiveItemToPlayerDialog";
+import {useTheme} from '@mui/material/styles';
 
 const Items = () => {
         const {
@@ -36,10 +49,10 @@ const Items = () => {
             setItemsLoading,
             setViewItemOpen,
             setViewItem,
-        /*    players,
-            handleGetPlayers,
-            playersLoading,
-            setPlayersLoading*/
+            /*    players,
+                handleGetPlayers,
+                playersLoading,
+                setPlayersLoading*/
         } = useContext(ItemContext);
 
 
@@ -105,14 +118,21 @@ const Items = () => {
             item.label?.toLowerCase().includes(searchText.toLowerCase())
         ) ?? [];
 
+        const theme = useTheme(); // Zugriff auf das aktuelle Theme
+
+
         const handleCreate = useCallback((data: Item) => {
             setItemFormOpen(false)
             setItemsLoading(true)
-            console.log('handleCreate: useCallback createItem')
-            console.log(JSON.stringify(data))
-            fetchNui('createItem', JSON.stringify(data)).then(_retData => {
-                console.log('handleCreate: fetchNui createItem')
+            if (debugMode) {
+                console.log('handleCreate: useCallback createItem')
                 console.log(JSON.stringify(data))
+            }
+            fetchNui('createItem', JSON.stringify(data)).then(_retData => {
+                if (debugMode) {
+                    console.log('handleCreate: fetchNui createItem')
+                    console.log(JSON.stringify(data))
+                }
                 handleGetItems()
                 return
             }).catch(_e => {
@@ -124,11 +144,15 @@ const Items = () => {
         const handleEdit = useCallback((data: Item) => {
             setItemFormOpen(false)
             setItemsLoading(true)
-            console.log('handleEdit: useCallback editItem')
-            console.log(JSON.stringify(data))
-            fetchNui('editItem', JSON.stringify(data)).then(_retData => {
-                console.log('handleEdit: fetchNui editItem')
+            if (debugMode){
+                console.log('handleEdit: useCallback editItem')
                 console.log(JSON.stringify(data))
+            }
+            fetchNui('editItem', JSON.stringify(data)).then(_retData => {
+                if (debugMode){
+                    console.log('handleEdit: fetchNui editItem')
+                    console.log(JSON.stringify(data))
+                }
                 handleGetItems()
                 return
             }).catch(_e => {
@@ -142,17 +166,6 @@ const Items = () => {
             setItemsLoading(true)
             setCurrentItem(undefined)
             handleGetItems()
-
-            /*console.log('handleEdit: useCallback')
-            console.log(JSON.stringify(data))
-            fetchNui('editItem', JSON.stringify(data)).then(_retData => {
-                console.log('handleEdit: fetchNui editItem')
-                console.log(JSON.stringify(data))
-                handleGetItems()
-                return
-            }).catch(_e => {
-                console.error('An error has occured')
-            })*/
 
         }, [handleGetItems, setItemsLoading])
 
@@ -309,100 +322,126 @@ const Items = () => {
             },
         ];
 
-        return (
-            <>
-                <Box display="flex" flexDirection="column" height="100%" width="100%">
-                    <Grid container spacing={1}>
-                        <Grid item xs={11}>
-                            <TextField
-                                label={texts.search}
-                                variant="outlined"
-                                value={searchText}
-                                onChange={handleSearch}
-                                style={{marginBottom: "1vh"}}
-                                fullWidth
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton edge="end" disabled>
-                                                <SearchIcon/>
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={1}>
-                            {/*         <IconButton
-                                size={"large"}
-                                style={{}}
-                                onClick={() => setItemFormOpen(true)}
-                                aria-label={texts.createItemBtn}
-                            >
-                                <AddIcon/>
-                            </IconButton>*/}
-                            <Button variant="contained"
-                                    onClick={() => setItemFormOpen(true)}
-                                    style={{padding: "1vh"}}
-                                    fullWidth
-                                    startIcon={<AddIcon/>}
-                            >{texts.createItemBtn}</Button>
-                        </Grid>
+        return (<>
+            <Box display="flex" flexDirection="column" height="100%" width="100%">
+                <Grid container spacing={1}>
+                    <Grid item xs={11}>
+                        <TextField
+                            label={texts.search}
+                            variant="outlined"
+                            value={searchText}
+                            onChange={handleSearch}
+                            style={{marginBottom: "1vh"}}
+                            fullWidth
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton edge="end" disabled>
+                                            <SearchIcon/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
                     </Grid>
-                    <DataGrid
-                        rows={filteredItems}
-                        columns={columns}
-                        loading={itemsLoading}
-                        pageSize={pageSize}
-                        initialState={{
-                            sorting: {sortModel: [{field: "label", sort: 'asc'}]}
-                        }}
-                        rowsPerPageOptions={[10, 15, 20, 50]}
-                        onPageSizeChange={handlePageSizeChange}
-                        disableSelectionOnClick
-                    />
-                    {/* <Button variant="contained"
+                    <Grid item xs={1}>
+                        {/*         <IconButton
+                            size={"large"}
+                            style={{}}
                             onClick={() => setItemFormOpen(true)}
-                            style={{marginTop: "1vh"}}
-                            startIcon={<AddIcon/>}>{texts.createItemBtn}</Button>*/}
+                            aria-label={texts.createItemBtn}
+                        >
+                            <AddIcon/>
+                        </IconButton>*/}
+                        <Button variant="contained"
+                                onClick={() => setItemFormOpen(true)}
+                                style={{padding: "1vh"}}
+                                fullWidth
+                                startIcon={<AddIcon/>}
+                        >{texts.createItemBtn}</Button>
+                    </Grid>
+                </Grid>
+                <DataGrid
+                    rowHeight={65}
+                    rows={filteredItems}
+                    columns={columns}
+                    loading={itemsLoading}
+                    pageSize={pageSize}
+                    initialState={{
+                        sorting: {sortModel: [{field: "label", sort: 'asc'}]}
+                    }}
+                    rowsPerPageOptions={[10, 15, 20, 50]}
+                    onPageSizeChange={handlePageSizeChange}
+                    disableSelectionOnClick={false}
+                />
+                {/* <Button variant="contained"
+                        onClick={() => setItemFormOpen(true)}
+                        style={{marginTop: "1vh"}}
+                        startIcon={<AddIcon/>}>{texts.createItemBtn}</Button>*/}
 
-                </Box>
-                <Dialog maxWidth="md" open={isItemFormOpen} onClose={() => {
-                    setItemFormOpen(false)
-                    setCurrentItem(undefined)
-                }}>
-                    <CreateEditItem items={items} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
-                                    itemData={currentItem}/>
-                </Dialog>
-                <GiveItemDialog
-                    open={isGiveItemOpen}
-                    handleAgree={handleGiveItem}
-                    handleCancel={handleGiveItemCancel}
-                    title={`${itemToGive?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}
-                    itemData={itemToGive}
-                />
-                <GiveItemToPlayerDialog
-                    open={isGiveItemToPlayerOpen}
-                    handleAgree={handleGiveItemToPlayer}
-                    handleCancel={handleGiveItemToPlayerCancel}
-                    players={players}
-                    playersLoading={playersLoading}
-                    title={`${itemToGiveToPlayer?.label || ""}`}
-                    text={`<strong>${texts.giveItemQuestion}`}
-                    itemData={itemToGiveToPlayer}
-                />
-                <DeleteItemDialog
-                    open={isDeleteOpen}
-                    handleAgree={handleDelete}
-                    handleCancel={handleCancel}
-                    title={`${itemToDelete?.label || ""}`}
-                    text={`<strong>${texts.deleteItemQuestion}`}
-                    itemData={currentItem}
-                />
-            </>
-        );
+            </Box>
+            <Dialog maxWidth="md" open={isItemFormOpen} onClose={() => {
+                setItemFormOpen(false)
+                setCurrentItem(undefined)
+            }}>
+                <CreateEditItem items={items} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
+                                itemData={currentItem}/>
+            </Dialog>
+            <GiveItemDialog
+                open={isGiveItemOpen}
+                handleAgree={handleGiveItem}
+                handleCancel={handleGiveItemCancel}
+                title={`${itemToGive?.label || ""}`}
+                text={`<strong>${texts.giveItemQuestion}`}
+                itemData={itemToGive}
+            />
+            <GiveItemToPlayerDialog
+                open={isGiveItemToPlayerOpen}
+                handleAgree={handleGiveItemToPlayer}
+                handleCancel={handleGiveItemToPlayerCancel}
+                players={players}
+                playersLoading={playersLoading}
+                title={`${itemToGiveToPlayer?.label || ""}`}
+                text={`<strong>${texts.giveItemQuestion}`}
+                itemData={itemToGiveToPlayer}
+            />
+            <DeleteItemDialog
+                open={isDeleteOpen}
+                handleAgree={handleDelete}
+                handleCancel={handleCancel}
+                title={`${itemToDelete?.label || ""}`}
+                text={`<strong>${texts.deleteItemQuestion}`}
+                itemData={currentItem}
+            />
+        </>);
     }
 ;
+
+const CustomScrollContainer = styled("div")`
+    height: 100%;
+    overflow-y: auto;
+
+    /* Dynamische Scrollbar Styles basierend auf dem Theme */
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: ${({theme}) => theme.palette.background.paper}; /* Dynamische Track-Farbe */
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: ${({theme}) => theme.palette.primary.main}; /* Dynamische Thumb-Farbe */
+        border-radius: 10px;
+        border: 2px solid ${({theme}) => theme.palette.background.paper}; /* Dynamischer Rand */
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: ${({theme}) => theme.palette.primary.dark}; /* Dynamische Hover-Farbe */
+    }
+`;
 
 export default Items;

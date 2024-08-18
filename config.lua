@@ -6,8 +6,8 @@
 --          ╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝    ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 
 Config = {}
-
-Config.Command = "search" -- If nil, the command won't work
+Config.debugMode = true
+Config.Command = "rootssearch" -- If nil, the command won't work
 Config.RegisterKey = "k" -- example: "k". If nil, there won't be a key registered. "Config.Command" has to be set to work.
 
 Config.DocumentItemName = nil -- The name of the item you want to open the documents. If nil, no item will be registered. Example: "wallet"

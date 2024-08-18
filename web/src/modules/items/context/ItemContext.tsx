@@ -1,5 +1,6 @@
 import React, { ReactNode, useCallback, useState } from "react"
 import { fetchNui } from "../../../utils/fetchNui"
+import {debugMode} from "../../../AppConfig";
 
 export type ContextType = {
     items: Item[] | null
@@ -37,7 +38,9 @@ export const ItemContextProvider = (props: {children: ReactNode}) => {
 
     const handleGetItems = useCallback(() => {
         fetchNui('getItems').then(retData => {
-            //console.log('Received items from server:', retData);
+            if (debugMode){
+                console.log('Received items from server:', retData);
+            }
             setItemsLoading(false)
             setItems(retData)
         }).catch(_e => {

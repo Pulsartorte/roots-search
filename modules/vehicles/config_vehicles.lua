@@ -1,6 +1,6 @@
-JobConfig = {
+VehicleConfig = {
     debugMode = true,
 
 }
 
-return JobConfig
+return VehicleConfig

@@ -4,13 +4,13 @@ import {
     GridActionsCellItem,
     GridColumns,
     GridRenderCellParams,
-    GridRowParams,
+    GridRowParams, GridRowSpacing, GridRowSpacingParams,
     GridValueGetterParams
 } from "@mui/x-data-grid";
 import {Box, Button, Checkbox, Chip, Dialog, Grid, IconButton, InputAdornment, TextField, Tooltip} from "@mui/material";
 import moment from "moment";
 import {DATE_FORMAT} from "../../../utils/consts";
-import {jobImagePrefix, texts} from "../../../AppConfig";
+import {debugMode, jobImagePrefix, texts} from "../../../AppConfig";
 import {fetchNui} from "../../../utils/fetchNui";
 import {JobContext} from "../context/JobContext";
 import DeleteJobDialog from "../components/DeleteJobDialog";
@@ -127,13 +127,22 @@ const Jobs = () => {
                 };
                 return obj;
             }, {} as Record<string, Omit<Grade, 'order'>>);
-            console.log(job.grades)
-            console.log('Converting')
-            console.log(gradesObject)
+            if (debugMode){
+                console.log(job.grades)
+                console.log('Converting')
+                console.log(gradesObject)
+            }
             // Rückgabe eines neuen Job-Objekts mit dem umgewandelten grades-Objekt
             return {
                 ...job,
                 grades: gradesObject as any, // Typanpassung, falls notwendig
+            };
+        }
+
+        const getRowSpacing = (params: GridRowSpacingParams): GridRowSpacing => {
+            return {
+                top: 10,
+                bottom: 10,
             };
         }
 
@@ -331,103 +340,102 @@ const Jobs = () => {
             },
         ];
 
-        return (
-            <>
-                <Box display="flex" flexDirection="column" height="100%" width="100%">
-                    <Grid container spacing={1}>
-                        <Grid item xs={11}>
-                            <TextField
-                                label={texts.search}
-                                variant="outlined"
-                                value={searchText}
-                                onChange={handleSearch}
-                                style={{marginBottom: "1vh"}}
-                                fullWidth
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton edge="end" disabled>
-                                                <SearchIcon/>
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={1}>
-                            {/*         <IconButton
-                                size={"large"}
-                                style={{}}
-                                onClick={() => setJobFormOpen(true)}
-                                aria-label={texts.createItemBtn}
-                            >
-                                <AddIcon/>
-                            </IconButton>*/}
-                            <Button variant="contained"
-                                    onClick={() => setJobFormOpen(true)}
-                                    style={{padding: "1vh"}}
-                                    fullWidth
-                                    startIcon={<AddIcon/>}
-                            >{texts.createJobBtn}</Button>
-                        </Grid>
+        return (<>
+            <Box display="flex" flexDirection="column" height="100%" width="100%">
+                <Grid container spacing={1} >
+                    <Grid item xs={11}>
+                        <TextField
+                            label={texts.search}
+                            variant="outlined"
+                            value={searchText}
+                            onChange={handleSearch}
+                            style={{marginBottom: "1vh"}}
+                            fullWidth
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton edge="end" disabled>
+                                            <SearchIcon/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
                     </Grid>
-                    <DataGrid
-                        rows={filteredItems}
-                        columns={columns}
-                        loading={jobsLoading}
-                        pageSize={pageSize}
-                        initialState={{
-                            sorting: {sortModel: [{field: "label", sort: 'asc'}]}
-                        }}
-                        rowsPerPageOptions={[10, 15, 20, 50]}
-                        onPageSizeChange={handlePageSizeChange}
-                        disableSelectionOnClick
-                    />
-                    {/* <Button variant="contained"
+                    <Grid item xs={1}>
+                        {/*         <IconButton
+                            size={"large"}
+                            style={{}}
                             onClick={() => setJobFormOpen(true)}
-                            style={{marginTop: "1vh"}}
-                            startIcon={<AddIcon/>}>{texts.createItemBtn}</Button>*/}
+                            aria-label={texts.createItemBtn}
+                        >
+                            <AddIcon/>
+                        </IconButton>*/}
+                        <Button variant="contained"
+                                onClick={() => setJobFormOpen(true)}
+                                style={{padding: "1vh"}}
+                                fullWidth
+                                startIcon={<AddIcon/>}
+                        >{texts.createJobBtn}</Button>
+                    </Grid>
+                </Grid>
+                <DataGrid
+                    rowHeight={65}
+                    rows={filteredItems}
+                    columns={columns}
+                    loading={jobsLoading}
+                    pageSize={pageSize}
+                    initialState={{
+                        sorting: {sortModel: [{field: "label", sort: 'asc'}]}
+                    }}
+                    rowsPerPageOptions={[10, 15, 20, 50]}
+                    onPageSizeChange={handlePageSizeChange}
+                    disableSelectionOnClick={false}
+                />
+                {/* <Button variant="contained"
+                        onClick={() => setJobFormOpen(true)}
+                        style={{marginTop: "1vh"}}
+                        startIcon={<AddIcon/>}>{texts.createItemBtn}</Button>*/}
 
-                </Box>
-                <Dialog maxWidth="md" open={isJobFormOpen} onClose={() => {
-                    setJobFormOpen(false)
-                    setCurrentJob(undefined)
-                }}>
-                    <CreateEditJob jobs={jobs} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
-                                   jobData={currentJob}/>
-                </Dialog>
-                <SetJobDialog
-                    open={isSetJobOpen}
-                    handleAgree={handleSetJob}
-                    handleCancel={handleSetJobCancel}
-                    title={`${jobToSet?.label || ""}`}
-                    text={`<strong>${texts.setJobQuestion}`}
-                    grades={grades}
-                    gradesLoading={jobsLoading}
-                    jobData={jobToSet}
-                />
-                <SetJobToPlayerDialog
-                    open={isSetJobToPlayerOpen}
-                    handleAgree={handleSetJobToPlayer}
-                    handleCancel={handleSetJobToPlayerCancel}
-                    players={players}
-                    playersLoading={playersLoading}
-                    grades={gradesPlayer}
-                    gradesLoading={jobsLoading}
-                    title={`${jobToSetToPlayer?.label || ""}`}
-                    text={`<strong>${texts.setJobToPlayerQuestion}`}
-                    jobData={jobToSetToPlayer}
-                />
-                <DeleteJobDialog
-                    open={isDeleteOpen}
-                    handleAgree={handleDelete}
-                    handleCancel={handleCancel}
-                    title={`${jobToDelete?.label || ""}`}
-                    text={`<strong>${texts.deleteJobQuestion}`}
-                    jobData={currentJob}
-                />
-            </>
-        );
+            </Box>
+            <Dialog maxWidth="md" open={isJobFormOpen} onClose={() => {
+                setJobFormOpen(false)
+                setCurrentJob(undefined)
+            }}>
+                <CreateEditJob jobs={jobs} handleCreate={handleCreate} handleEdit={handleEdit} handleClose={handleClose}
+                               jobData={currentJob}/>
+            </Dialog>
+            <SetJobDialog
+                open={isSetJobOpen}
+                handleAgree={handleSetJob}
+                handleCancel={handleSetJobCancel}
+                title={`${jobToSet?.label || ""}`}
+                text={`<strong>${texts.setJobQuestion}`}
+                grades={grades}
+                gradesLoading={jobsLoading}
+                jobData={jobToSet}
+            />
+            <SetJobToPlayerDialog
+                open={isSetJobToPlayerOpen}
+                handleAgree={handleSetJobToPlayer}
+                handleCancel={handleSetJobToPlayerCancel}
+                players={players}
+                playersLoading={playersLoading}
+                grades={gradesPlayer}
+                gradesLoading={jobsLoading}
+                title={`${jobToSetToPlayer?.label || ""}`}
+                text={`<strong>${texts.setJobToPlayerQuestion}`}
+                jobData={jobToSetToPlayer}
+            />
+            <DeleteJobDialog
+                open={isDeleteOpen}
+                handleAgree={handleDelete}
+                handleCancel={handleCancel}
+                title={`${jobToDelete?.label || ""}`}
+                text={`<strong>${texts.deleteJobQuestion}`}
+                jobData={currentJob}
+            />
+        </>);
     }
 ;
 

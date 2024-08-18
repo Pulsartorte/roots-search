@@ -17,7 +17,6 @@ else
   return
 end
 
-print('WIRD INITIALISEIRT')
 
 if CurrentFramework == "esx" then
   CreateThread(function()
@@ -119,12 +118,6 @@ RegisterNUICallback('hideDocument', function(_, cb)
   toggleDocumentFrame(false, nil)
   cb({})
 end)
-
-if CurrentFramework and Config.Command then
-  RegisterCommand(Config.Command, function()
-    toggleNuiFrame(true, true)
-  end)
-end
 
 RegisterNUICallback('hideFrame', function(_, cb)
   toggleNuiFrame(false, false)
@@ -266,52 +259,3 @@ RegisterNetEvent('k5_documents:viewDocument')
 AddEventHandler('k5_documents:viewDocument', function(data)
 	toggleDocumentFrame(true, data.data)
 end)
-
-if Config.RegisterKey then
-  if Config.Command then
-    RegisterKeyMapping(Config.Command, Config.Locale.registerMapDescription, "keyboard", Config.RegisterKey)
-  else
-    print("^8ERROR: ^3No document command found. Please provide a \"Config.Command\" value.^7")
-  end
-end
-
-function playerSelector(confirmText)
-  toggleNuiFrame(false, true, nil)
-  selectingPlayer = true
-
-  while selectingPlayer do
-    local closestPlayer, closestPlayerDistance
-    if CurrentFramework == "esx" then
-      closestPlayer, closestPlayerDistance = ESX.Game.GetClosestPlayer()
-    elseif CurrentFramework == "qb" then
-      closestPlayer, closestPlayerDistance = QBCore.Functions.GetClosestPlayer()
-    end
-    local closestPlayerCoords = GetEntityCoords(GetPlayerPed(closestPlayer))
-
-    DisableControlAction(2, 200, true)
-
-    if IsControlJustReleased(0, 202) then
-      selectingPlayer = false
-      return -1
-    end
-
-    BeginTextCommandDisplayHelp('main')
-    AddTextEntry('main', "~INPUT_CONTEXT~ "..confirmText.."  ~INPUT_FRONTEND_PAUSE_ALTERNATE~ "..Config.Locale.cancel)
-    EndTextCommandDisplayHelp(0, 0, 1, -1)
-
-    if closestPlayer ~= -1 and closestPlayerDistance < 2.0 then
-      DrawMarker(20, closestPlayerCoords.x, closestPlayerCoords.y, closestPlayerCoords.z + 1.2, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.4, 0.4, -0.4, 255, 255, 255, 100, false, true, 2, false, false, false, false)
-      DrawMarker(25, closestPlayerCoords.x, closestPlayerCoords.y, closestPlayerCoords.z - 0.95, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 1.0, 1.0, 1.0, 255, 255, 255, 100, false, true, 2, false, false, false, false)
-      if IsControlJustReleased(0, 38) then
-        selectingPlayer = false
-        local targetId = GetPlayerServerId(closestPlayer)
-        return targetId
-      end
-    else
-      if IsControlJustReleased(0, 38) then
-        Notification(Config.Locale.noPlayersAround)
-      end
-    end
-    Citizen.Wait(1)
-  end
-end

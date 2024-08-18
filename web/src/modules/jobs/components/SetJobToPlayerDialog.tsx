@@ -57,14 +57,18 @@ const SetJobToPlayerDialog = ({
     };
 
     const handleCancelClick = () => {
-        console.log('Grade before closing')
-        console.log(selectedGrade)
+        if (debugMode){
+            console.log('Grade before closing')
+            console.log(selectedGrade)
+        }
         setSelectedGrade(null)
         setSelectedPlayer(null)
         setIsMultiJob(false)
         handleCancel()
-        console.log('Grade before closing')
-        console.log(selectedGrade)
+        if (debugMode){
+            console.log('Grade before closing')
+            console.log(selectedGrade)
+        }
     }
 
     const getTextWithVariable = (key: string, variable: string) => {

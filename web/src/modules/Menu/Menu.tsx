@@ -3,7 +3,7 @@ import List from '@mui/material/List';
 import ListElement from './_components/List/ListElement';
 import { NavLinks } from './NavLinks';
 import {availableJobs, colors} from "../../AppConfig";
-/*import { availableJobs, colors } from '../../../AppConfig';*/
+import { useTheme } from '@mui/material/styles';
 
 type Props = {
   selected: Page
@@ -13,6 +13,7 @@ type Props = {
 }
 
 const Menu = ({jobGrade, selected, job, setSelected}: Props) => {
+  const theme = useTheme(); // Zugriff auf das aktuelle Theme
 
   const handleListItemClick = (selectedPage: Page) => {
     setSelected(selectedPage);
@@ -37,7 +38,7 @@ const Menu = ({jobGrade, selected, job, setSelected}: Props) => {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: '75vh', width: '100%', background: `linear-gradient(30deg, ${colors.menuGradientBottom} 0%, ${colors.menuGradientTop} 100%)`, margin: "auto", alignSelf: "center", borderRadius: "1vh" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: '75vh', width: '100%', background: `linear-gradient(30deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`, margin: "auto", alignSelf: "center", borderRadius: "1vh" }}>
       <List component="nav">
         {NavLinks.map((navLink, key) => {
           return canSeeMenu(navLink) &&

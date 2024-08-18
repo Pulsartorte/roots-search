@@ -83,31 +83,29 @@ const MyDocuments = () => {
     },
   ];
 
-  return (
-    <>
-      <div style={{ height: '100%', width: '100%' }}>
-        <DataGrid
-          rows={documentCopies ?? []}
-          columns={columns}
-          loading={documentCopiesLoading}
-          pageSize={5}
-          initialState={{
-              sorting: {sortModel: [{field: "createdAt", sort: 'desc'}]}
-            }}
-          rowsPerPageOptions={[5]}
-          disableSelectionOnClick
-        />
-      </div>
-      <DeleteDialog
-        open={isDeleteOpen}
-        handleAgree={handleDelete}
-        handleCancel={handleCancel}
-        title={texts.deleteDocumentTitle}
-        text={`${texts.deleteDocumentQuestion} ${documentToDelete?.name || ""}`}
+  return (<>
+    <div style={{ height: '100%', width: '100%' }}>
+      <DataGrid
+        rows={documentCopies ?? []}
+        columns={columns}
+        loading={documentCopiesLoading}
+        pageSize={5}
+        initialState={{
+            sorting: {sortModel: [{field: "createdAt", sort: 'desc'}]}
+          }}
+        rowsPerPageOptions={[5]}
+        disableSelectionOnClick={false}
       />
-      <DocumentView />
-    </>
-  )
+    </div>
+    <DeleteDialog
+      open={isDeleteOpen}
+      handleAgree={handleDelete}
+      handleCancel={handleCancel}
+      title={texts.deleteDocumentTitle}
+      text={`${texts.deleteDocumentQuestion} ${documentToDelete?.name || ""}`}
+    />
+    <DocumentView />
+  </>);
 }
 
 export default MyDocuments

@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from "react"
 import { fetchNui } from "../../../utils/fetchNui"
+import {debugMode} from "../../../AppConfig";
 
 type Props = {
   handleGetJobs: () => void
@@ -20,25 +21,12 @@ const useSetJobToPlayer = ({handleGetJobs,setJobsLoading,}: Props) => {
 
     if (jobToSetToPlayer?.grades) {
       const gradesArray = jobToSetToPlayer.grades
-      // Konvertieren des grades-Objekts in ein Array
-     /* const gradesArray = Object.keys(jobToSetToPlayer.grades).map(key => ({
-        ...jobToSetToPlayer.grades[parseInt(key, 10)],
-        order: parseInt(key, 10)
-      }));*/
-
-/*
-      console.log('Vor der Sortierung')
-      console.log(gradesArray)
-      // Sortieren nach dem order-Feld
-      gradesArray.sort((a, b) => a.order - b.order);
-      console.log('Nach der Sortierung')
-      console.log(gradesArray)
-*/
-
       setGrades(gradesArray); // Das verarbeitete und sortierte Array in den Zustand setzen
     } else {
       setGrades([]); // Fallback: Leeres Array, falls keine Grades vorhanden sind
-      console.log('jobToSet is empty or has no grades');
+      if (debugMode){
+        console.log('jobToSet is empty or has no grades');
+      }
     }
 
     setGradesLoading(false);
@@ -56,7 +44,9 @@ const useSetJobToPlayer = ({handleGetJobs,setJobsLoading,}: Props) => {
 
     fetchNui('getPlayers')
         .then(retData => {
-          console.log('Received players from server:', retData);
+          if (debugMode){
+            console.log('Received players from server:', retData);
+          }
           setPlayers(retData);  // Spieler in den Zustand setzen
         })
         .catch(error => {
@@ -75,11 +65,13 @@ const useSetJobToPlayer = ({handleGetJobs,setJobsLoading,}: Props) => {
 
 
   const handleSetJobToPlayer = useCallback((jobGrade:number, selectedPlayer: Player, isMultiJob: boolean) => {
-    console.log('userCallback: handleGiveItem')
-    console.log('itemName:' + jobToSetToPlayer?.name)
-    console.log('jobGrade: ' + jobGrade)
-    console.log('selectedPlayerId:' + selectedPlayer.id);
-    console.log('selectedPlayerName:' + selectedPlayer.name);
+    if (debugMode){
+      console.log('userCallback: handleGiveItem')
+      console.log('itemName:' + jobToSetToPlayer?.name)
+      console.log('jobGrade: ' + jobGrade)
+      console.log('selectedPlayerId:' + selectedPlayer.id);
+      console.log('selectedPlayerName:' + selectedPlayer.name);
+    }
     setIsSetJobToPlayerOpen(false)
 
     let setJobData = {
@@ -89,12 +81,16 @@ const useSetJobToPlayer = ({handleGetJobs,setJobsLoading,}: Props) => {
       targetPlayerName: selectedPlayer.name,
       isMultiJob: isMultiJob,
     };
-    console.log(players.toString())
-    console.log('setJobData: ', setJobData)
+    if (debugMode){
+      console.log(players.toString())
+      console.log('setJobData: ', setJobData)
+    }
 
     fetchNui('setJob',setJobData).then(_retData => {
-      console.log('fetchNui: handleGiveItemToPlayer')
-      console.log('retData:' + _retData)
+      if (debugMode){
+        console.log('fetchNui: handleGiveItemToPlayer')
+        console.log('retData:' + _retData)
+      }
       handleGetJobs()
       setPlayersLoading(false)
       return

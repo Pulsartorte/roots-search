@@ -1,5 +1,6 @@
 import React, { ReactNode, useCallback, useState } from "react"
 import { fetchNui } from "../../../utils/fetchNui"
+import {debugMode} from "../../../AppConfig";
 
 
 export type ContextType = {
@@ -36,23 +37,15 @@ export const JobContextProvider = (props: {children: ReactNode}) => {
 
     const handleGetJobs = useCallback(() => {
         fetchNui('getJobs').then(retData => {
-            console.log('Received jobs from server:', retData);
+            if (debugMode) {
+                console.log('Received jobs from server:', retData);
+            }
             setJobsLoading(false)
             setJobs(retData)
         }).catch(_e => {
             console.error('An error has occured')
         })
     }, [])
-
-    /*const handleGetPlayers = useCallback(() => {
-        fetchNui('getPlayers').then(retData => {
-            console.log('Received jobs from server:', retData);
-            setPlayersLoading(false)
-            setPlayers(retData)
-        }).catch(_e => {
-            console.error('An error has occured')
-        })
-    }, [])*/
 
 
   return (
@@ -65,10 +58,6 @@ export const JobContextProvider = (props: {children: ReactNode}) => {
       setViewJob: setViewJob,
       isViewItemOpen: isViewJobOpen,
       setViewJobOpen: setIsViewJobOpen
-     /* players,
-      playersLoading,
-      setPlayersLoading,
-      handleGetPlayers,*/
     }}>
       {props.children}
     </JobContext.Provider>

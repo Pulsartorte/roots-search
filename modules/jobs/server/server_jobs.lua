@@ -1,27 +1,14 @@
-local RegisterCallback
-local RegisterJob
 local QBCore = exports['qb-core']:GetCoreObject()
 local RCore = exports['roots-core']:GetCoreObject()
---local config = require('server.config_jobs')
-local config = require('modules.jobs.config_jobs')
-if config then
-    print('Config geladen!!')
-end
-local CurrentFramework
 
-if GetResourceState("qb-core") == "started" then
-    CurrentFramework = "qb"
-else
-    print("^8ERROR: ^3This script only supports QBCore frameworks, but non of these are present. Unfortunatelly, you cannot use this script.^7")
-    return
-end
+local config = require('modules.jobs.config_jobs')
+
+local RegisterCallback
 
 RegisterCallback = function(name, fn)
     QBCore.Functions.CreateCallback(name, fn)
 end
-RegisterJob = function(jobName, fn)
-    QBCore.Functions.CreateUseableJob(jobName, fn)
-end
+
 
 RegisterCallback('roots-search:server:getJobs', function(source, cb)
     if config.debugMode then
@@ -38,11 +25,6 @@ RegisterCallback('roots-search:server:getJobs', function(source, cb)
             for k, v in pairs(jobs) do
                 local thisData = v
                 thisData.id = v.name
-                --[[      thisData.grades = json.decode(v.grades)
-                      thisData.created = v.createDate
-                      thisData.modified = v.modifiedDate
-                      thisData.lastTouched = v.lastTouched]]
-
                 -- Umwandlung von grades in ein Array und Berechnung von Min/Max Payment
                 local gradesArray = {}
                 local minPayment, maxPayment = nil, nil
@@ -103,7 +85,8 @@ RegisterCallback('roots-search:server:createJob', function(source, cb, data)
 
     RCore.Functions.Jobs.addJob(jobName, jobData, function(success)
         if success then
-            print('Jobs erfolgreich angelegt!')
+            logAction(source,'add', 'Job', jobName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -127,7 +110,8 @@ RegisterCallback('roots-search:server:editJob', function(source, cb, data)
 
     RCore.Functions.Jobs.updateJob(jobName, jobData, function(success)
         if success then
-            print('Jobs erfolgreich aktualisiert!')
+            logAction(source,'edit', 'Job', jobName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -139,7 +123,8 @@ RegisterCallback('roots-search:server:deleteJob', function(source, cb, data)
     local jobName = data
     RCore.Functions.Jobs.removeJob(jobName, function(success)
         if success then
-            print('Job wurde erfolgreich gelöscht')
+            logAction(source,'remove', 'Job', jobName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -159,10 +144,17 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
 
     if not job then
         print('Job nicht verfügbar.')
-        local msg = string.format('Job %s %s nicht verfügbar!', job.label, job.grades[jobGrade] )
+        local msg = string.format('Job %s %s nicht verfügbar!', jobName, jobGrade)
         QBCore.Functions.Notify(source, msg, 'success', 3500)
         return
     end
+
+    local jobLabel = job.label
+    local jobGrades = job.grades
+    local jobGradeName = jobGrades[tostring(jobGrade)].name
+    print('Job Label: ', jobLabel)
+    print('Grade Label: ', jobGradeName)
+
     if config.debugMode then
         print('roots-search:server:setJob to Player triggered')
         print('Data: ', json.encode(jobData))
@@ -171,11 +163,6 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
         print('AddJob: for ', jobData.jobName, jobData.jobGrade)
     end
 
-    local jobLabel = job.label
-    local jobGrades = job.grades
-    local jobGradeName = jobGrades[tostring(jobGrade)].name
-    print('Job Label: ', jobLabel)
-    print('Grade Label: ', jobGradeName)
     if not targetPlayerId then
         local Player = QBCore.Functions.GetPlayer(playerId)
         if Player then
@@ -196,19 +183,19 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
             end
         end
     else
-        local Player = QBCore.Functions.GetPlayer(targetPlayerId)
-        if Player then
-            Player.Functions.SetJob(jobName, jobGrade)
-            local msg = string.format('Du hast %s | Job: %s Rang: %s zugewiesen', targetPlayerName, jobLabel,jobGradeName)
+        local targetPlayer = QBCore.Functions.GetPlayer(targetPlayerId)
+        if targetPlayer then
+            targetPlayer.Functions.SetJob(jobName, jobGrade)
+            local msg = string.format('Du hast %s | Job: %s Rang: %s zugewiesen', targetPlayerName, jobLabel, jobGradeName)
             QBCore.Functions.Notify(playerId, msg, 'success', 3500)
-            local msg = string.format('Dir wurde Job: %s Rang: %s gesetzt', jobLabel, jobGradeName )
+            local msg = string.format('Dir wurde Job: %s Rang: %s gesetzt', jobLabel, jobGradeName)
             QBCore.Functions.Notify(targetPlayerId, msg, 'success', 3500)
         else
             TriggerClientEvent('QBCore:Notify', source, Lang:t('error.not_online'), 'error')
         end
 
         if isMultiJob then
-            local citizenid = Player.PlayerData.citizenid
+            local citizenid = targetPlayer.PlayerData.citizenid
             local success = exports['ps-multijob']:AddJob(citizenid, jobName, jobGrade)
             if success then
                 local msg = string.format('Du hast %s | Job: %s Rang: %s im MultiJob zugewiesen', targetPlayerName, jobLabel, jobGradeName)
@@ -222,18 +209,6 @@ AddEventHandler('roots-search:server:setJob', function(jobData)
     end
 end)
 
-function GetPlayer(src)
-    return QBCore.Functions.GetPlayer(src)
-end
-
-function GetPlayerIdentifier(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.citizenid
-end
-
-function GetPlayerJobName(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.job.name
-end
-
 -- Funktion zum Zählen der Anzahl der Jobs
 function getJobCount(jobs)
     local jobCount = 0
@@ -244,66 +219,4 @@ function getJobCount(jobs)
         jobCount = jobCount + 1
     end
     return jobCount
-end
-
--- Summarize all Online Players
-
-function GetQBPlayers()
-    print('GetQBPlayers triggered')
-    local playerReturn = {}
-    local players = QBCore.Functions.GetQBPlayers()
-
-    for id, player in pairs(players) do
-        local name = (player.PlayerData.charinfo.firstname or '') .. ' ' .. (player.PlayerData.charinfo.lastname or '')
-        playerReturn[#playerReturn + 1] = {
-            id = id,
-            name = name .. ' | (' .. (player.PlayerData.name or '') .. ')',
-            cid = name,
-            citizenid = player.PlayerData.citizenid,
-        }
-        print(json.encode(playerReturn[#playerReturn]))
-    end
-    return playerReturn
-end
-
-function prepareJobInfo(player, jobData)
-    if jobData then
-        -- check jobinfo
-        local jobInfo = {}
-        if jobData['name'] == 'id_card' then
-            jobInfo.citizenid = player.PlayerData.citizenid
-            jobInfo.firstname = player.PlayerData.charinfo.firstname
-            jobInfo.lastname = player.PlayerData.charinfo.lastname
-            jobInfo.birthdate = player.PlayerData.charinfo.birthdate
-            jobInfo.gender = player.PlayerData.charinfo.gender
-            jobInfo.nationality = player.PlayerData.charinfo.nationality
-        elseif jobData['name'] == 'driver_license' then
-            jobInfo.firstname = player.PlayerData.charinfo.firstname
-            jobInfo.lastname = player.PlayerData.charinfo.lastname
-            jobInfo.birthdate = player.PlayerData.charinfo.birthdate
-            jobInfo.type = 'Class C Driver License'
-        elseif jobData['type'] == 'weapon' then
-            amount = 1
-            jobInfo.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
-            jobInfo.quality = 100
-        elseif jobData['name'] == 'harness' then
-            jobInfo.uses = 20
-        elseif jobData['name'] == 'markedbills' then
-            jobInfo.worth = math.random(5000, 10000)
-        end
-
-        -- need to update the info that the player gets the right information about this changed job
-        --jobInfo.description = jobData.description
-
-        --[[jobInfo.label = jobData.label
-        jobInfo.weight = jobData.weight
-        jobInfo.type = jobData.type
-        jobInfo.unique = jobData.unique
-        jobInfo.useable = jobData.useable
-        jobInfo.image = jobData.image
-        jobInfo.shouldClose = jobData.should
-        jobInfo.combinable = jobData.combinable]]
-
-        return jobInfo
-    end
 end

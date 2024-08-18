@@ -1,26 +1,12 @@
-local RegisterCallback
-local RegisterVehicle
 local QBCore = exports['qb-core']:GetCoreObject()
 local RCore = exports['roots-core']:GetCoreObject()
---local config = require('server.config_vehicles')
-local config = require('modules.vehicles.config_vehicles')
-if config then
-    print('Config geladen!!')
-end
-local CurrentFramework
 
-if GetResourceState("qb-core") == "started" then
-    CurrentFramework = "qb"
-else
-    print("^8ERROR: ^3This script only supports QBCore frameworks, but non of these are present. Unfortunatelly, you cannot use this script.^7")
-    return
-end
+local config = require('modules.vehicles.config_vehicles')
+
+local RegisterCallback
 
 RegisterCallback = function(name, fn)
     QBCore.Functions.CreateCallback(name, fn)
-end
-RegisterVehicle = function(vehicleName, fn)
-    QBCore.Functions.CreateUseableVehicle(vehicleName, fn)
 end
 
 RegisterCallback('roots-search:server:getVehicles', function(source, cb)
@@ -53,8 +39,6 @@ RegisterCallback('roots-search:server:getVehicles', function(source, cb)
 end)
 
 RegisterCallback('roots-search:server:createVehicle', function(source, cb, data)
-    local src = source
-    local PlayerVehicleName = GetPlayerVehicleName(src)
     if config.debugMode then
         print('roots-search:server:createVehicle')
         print(json.encode(data))
@@ -65,10 +49,12 @@ RegisterCallback('roots-search:server:createVehicle', function(source, cb, data)
         vehicleName = vehicle.name
     end
     local vehicleData = vehicle
+    vehicleData.lastTouched = GetPlayerAccountName(source)
 
     RCore.Functions.Vehicles.addVehicle(vehicleName, vehicleData, function(success)
         if success then
-            print('Vehicles erfolgreich angelegt!')
+            logAction(source,'add', 'Vehicle', vehicleName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -87,10 +73,12 @@ RegisterCallback('roots-search:server:editVehicle', function(source, cb, data)
         vehicleName = vehicle.name
     end
     local vehicleData = vehicle
+    vehicleData.lastTouched = GetPlayerAccountName(source)
 
     RCore.Functions.Vehicles.updateVehicle(vehicleName, vehicleData, function(success)
         if success then
-            print('Vehicles erfolgreich aktualisiert!')
+            logAction(source,'edit', 'Vehicle', vehicleName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -102,7 +90,8 @@ RegisterCallback('roots-search:server:deleteVehicle', function(source, cb, data)
     local vehicleName = data
     RCore.Functions.Vehicles.removeVehicle(vehicleName, function(success)
         if success then
-            print('Vehicle wurde erfolgreich gelöscht')
+            logAction(source,'remove', 'Vehicle', vehicleName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -191,18 +180,6 @@ AddEventHandler('roots-search:server:giveVehicle', function(data)
     end
 end)
 
-function GetPlayer(src)
-    return QBCore.Functions.GetPlayer(src)
-end
-
-function GetPlayerIdentifier(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.citizenid
-end
-
-function GetPlayerVehicleName(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.vehicle.name
-end
-
 -- Funktion zum Zählen der Anzahl der Vehicles
 function getVehicleCount(vehicles)
     local vehicleCount = 0
@@ -213,66 +190,4 @@ function getVehicleCount(vehicles)
         vehicleCount = vehicleCount + 1
     end
     return vehicleCount
-end
-
--- Summarize all Online Players
-
-function GetQBPlayers()
-    print('GetQBPlayers triggered')
-    local playerReturn = {}
-    local players = QBCore.Functions.GetQBPlayers()
-
-    for id, player in pairs(players) do
-        local name = (player.PlayerData.charinfo.firstname or '') .. ' ' .. (player.PlayerData.charinfo.lastname or '')
-        playerReturn[#playerReturn + 1] = {
-            id = id,
-            name = name .. ' | (' .. (player.PlayerData.name or '') .. ')',
-            cid = name,
-            citizenid = player.PlayerData.citizenid,
-        }
-        print(json.encode(playerReturn[#playerReturn]))
-    end
-    return playerReturn
-end
-
-function prepareVehicleInfo(player, vehicleData)
-    if vehicleData then
-        -- check vehicleinfo
-        local vehicleInfo = {}
-        if vehicleData['name'] == 'id_card' then
-            vehicleInfo.citizenid = player.PlayerData.citizenid
-            vehicleInfo.firstname = player.PlayerData.charinfo.firstname
-            vehicleInfo.lastname = player.PlayerData.charinfo.lastname
-            vehicleInfo.birthdate = player.PlayerData.charinfo.birthdate
-            vehicleInfo.gender = player.PlayerData.charinfo.gender
-            vehicleInfo.nationality = player.PlayerData.charinfo.nationality
-        elseif vehicleData['name'] == 'driver_license' then
-            vehicleInfo.firstname = player.PlayerData.charinfo.firstname
-            vehicleInfo.lastname = player.PlayerData.charinfo.lastname
-            vehicleInfo.birthdate = player.PlayerData.charinfo.birthdate
-            vehicleInfo.type = 'Class C Driver License'
-        elseif vehicleData['type'] == 'weapon' then
-            amount = 1
-            vehicleInfo.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
-            vehicleInfo.quality = 100
-        elseif vehicleData['name'] == 'harness' then
-            vehicleInfo.uses = 20
-        elseif vehicleData['name'] == 'markedbills' then
-            vehicleInfo.worth = math.random(5000, 10000)
-        end
-
-        -- need to update the info that the player gets the right information about this changed vehicle
-        --vehicleInfo.description = vehicleData.description
-
-        --[[vehicleInfo.label = vehicleData.label
-        vehicleInfo.weight = vehicleData.weight
-        vehicleInfo.type = vehicleData.type
-        vehicleInfo.unique = vehicleData.unique
-        vehicleInfo.useable = vehicleData.useable
-        vehicleInfo.image = vehicleData.image
-        vehicleInfo.shouldClose = vehicleData.should
-        vehicleInfo.combinable = vehicleData.combinable]]
-
-        return vehicleInfo
-    end
 end

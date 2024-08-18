@@ -1,1 +1,30 @@
 /* Add your custom styles in this file */
+.MuiDataGrid-root .MuiDataGrid-cell {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+/* Allgemeine Scrollbar-Stile */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Hintergrund der Scrollbar */
+::-webkit-scrollbar-track {
+    background: #2B2D42; /* Hintergrundfarbe der Scrollbar, angepasst an dein Design */
+    border-radius: 10px;
+}
+
+/* Scrollbar-Daumen (der Teil, den man greift) */
+::-webkit-scrollbar-thumb {
+    background-color: #A7C957; /* Farbe des Scrollbar-Daumens, passend zum Theme */
+    border-radius: 10px;
+    border: 2px solid #2B2D42; /* Optional: eine Randfarbe, die die Scrollbar vom Hintergrund abhebt */
+}
+
+/* Optional: Scrollbar-Daumen bei Hover */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #6A994E; /* Etwas dunkleres Grün beim Hover */
+}
+

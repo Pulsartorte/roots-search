@@ -83,39 +83,36 @@ const Templates = () => {
     
   },[handleGetTemplates, setTemplatesLoading])
 
-  return (
-    <>
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <div style={{ flex: 1, marginBottom: "10px" }}>
-          <DataGrid
-            loading={templatesLoading}
-            style={{ height: '100%' }}
-            rows={templates ?? []}
-            columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            disableSelectionOnClick
-            />
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end"}}>
-          <Button variant="contained" onClick={() => setTemplateFormOpen(true)}>{texts.newTemplateBtn}</Button>
-        </div>
+  return (<>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ flex: 1, marginBottom: "10px" }}>
+        <DataGrid
+          loading={templatesLoading}
+          style={{ height: '100%' }}
+          rows={templates ?? []}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          disableSelectionOnClick={false}
+          />
       </div>
-      <Dialog maxWidth="md" open={isTemplateFormOpen} onClose={() => {
-        setTemplateFormOpen(false)
-        setCurrentTemplate(undefined)
-      }}>
-        <CreateEditTemplate handleCreate={handleCreate} handleEdit={handleEdit} templateData={currentTemplate} />
-      </Dialog>
-      <DeleteDialog
-        open={isDeleteOpen}
-        handleAgree={handleDelete}
-        handleCancel={handleCancel}
-        title={texts.deleteTemplateTitle}
-        text={`${texts.deleteTemplateQuestion} ${templateToDelete?.documentName || ""}`} />
-    </>
-    
-  )
+      <div style={{ display: "flex", justifyContent: "flex-end"}}>
+        <Button variant="contained" onClick={() => setTemplateFormOpen(true)}>{texts.newTemplateBtn}</Button>
+      </div>
+    </div>
+    <Dialog maxWidth="md" open={isTemplateFormOpen} onClose={() => {
+      setTemplateFormOpen(false)
+      setCurrentTemplate(undefined)
+    }}>
+      <CreateEditTemplate handleCreate={handleCreate} handleEdit={handleEdit} templateData={currentTemplate} />
+    </Dialog>
+    <DeleteDialog
+      open={isDeleteOpen}
+      handleAgree={handleDelete}
+      handleCancel={handleCancel}
+      title={texts.deleteTemplateTitle}
+      text={`${texts.deleteTemplateQuestion} ${templateToDelete?.documentName || ""}`} />
+  </>);
 }
 
 export default Templates

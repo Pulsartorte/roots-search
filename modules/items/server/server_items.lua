@@ -2,19 +2,8 @@ local RegisterCallback
 local RegisterItem
 local QBCore = exports['qb-core']:GetCoreObject()
 local RCore = exports['roots-core']:GetCoreObject()
---local config = require('server.config_items')
-local config = require('modules.items.config_items')
-if config then
-    print('Config geladen!!')
-end
-local CurrentFramework
 
-if GetResourceState("qb-core") == "started" then
-    CurrentFramework = "qb"
-else
-    print("^8ERROR: ^3This script only supports QBCore frameworks, but non of these are present. Unfortunatelly, you cannot use this script.^7")
-    return
-end
+local config = require('modules.items.config_items')
 
 RegisterCallback = function(name, fn)
     QBCore.Functions.CreateCallback(name, fn)
@@ -54,7 +43,7 @@ end)
 
 RegisterCallback('roots-search:server:createItem', function(source, cb, data)
     local src = source
-    local PlayerJobName = GetPlayerJobName(src)
+    --local PlayerJobName = GetPlayerJobName(src)
     if config.debugMode then
         print('roots-search:server:createItem')
         print(json.encode(data))
@@ -65,10 +54,12 @@ RegisterCallback('roots-search:server:createItem', function(source, cb, data)
         itemName = item.name
     end
     local itemData = item
+    itemData.lastTouched = GetPlayerAccountName(source)
 
     RCore.Functions.Items.addItem(itemName, itemData, function(success)
         if success then
-            print('Items erfolgreich angelegt!')
+            logAction(source,'add', 'Item', itemName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -88,9 +79,12 @@ RegisterCallback('roots-search:server:editItem', function(source, cb, data)
     end
     local itemData = item
 
+    itemData.lastTouched = GetPlayerAccountName(source)
+
     RCore.Functions.Items.updateItem(itemName, itemData, function(success)
         if success then
-            print('Items erfolgreich aktualisiert!')
+            logAction(source,'edit', 'Item', itemName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
@@ -102,31 +96,14 @@ RegisterCallback('roots-search:server:deleteItem', function(source, cb, data)
     local itemName = data
     RCore.Functions.Items.removeItem(itemName, function(success)
         if success then
-            print('Item wurde erfolgreich gelöscht')
+            logAction(source,'remove', 'Item', itemName)
+            QBCore = RefreshQBCore()
         end
         if cb then
             cb(success)
         end
     end)
 end)
-
-
---[[RegisterCallback('roots-search:server:getPlayerData', function(source, cb)
-    local src = source
-    local PlayerIdentifier = GetPlayerIdentifier(src)
-    -- TODO CHECK THE PLAYER DATA
-    MySQL.query(
-            'SELECT firstname, lastname, dateofbirth FROM users WHERE identifier = @identifier', {
-                ['@identifier'] = PlayerIdentifier
-            }, function(result)
-                cb({
-                    firstname = result[1].firstname,
-                    lastname = result[1].lastname,
-                    dateofbirth = result[1].dateofbirth,
-                    dateformat = Config.BirthdateFormat,
-                })
-            end)
-end)]]
 
 RegisterServerEvent('roots-search:server:giveItemYourself')
 AddEventHandler('roots-search:server:giveItemYourself', function(data)
@@ -209,18 +186,6 @@ AddEventHandler('roots-search:server:giveItem', function(data)
     end
 end)
 
-function GetPlayer(src)
-    return QBCore.Functions.GetPlayer(src)
-end
-
-function GetPlayerIdentifier(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.citizenid
-end
-
-function GetPlayerJobName(src)
-    return QBCore.Functions.GetPlayer(src).PlayerData.job.name
-end
-
 -- Funktion zum Zählen der Anzahl der Items
 function getItemCount(items)
     local itemCount = 0
@@ -231,26 +196,6 @@ function getItemCount(items)
         itemCount = itemCount + 1
     end
     return itemCount
-end
-
--- Summarize all Online Players
-
-function GetQBPlayers()
-    print('GetQBPlayers triggered')
-    local playerReturn = {}
-    local players = QBCore.Functions.GetQBPlayers()
-
-    for id, player in pairs(players) do
-        local name = (player.PlayerData.charinfo.firstname or '') .. ' ' .. (player.PlayerData.charinfo.lastname or '')
-        playerReturn[#playerReturn + 1] = {
-            id = id,
-            name = name .. ' | (' .. (player.PlayerData.name or '') .. ')',
-            cid = name,
-            citizenid = player.PlayerData.citizenid,
-        }
-        print(json.encode(playerReturn[#playerReturn]))
-    end
-    return playerReturn
 end
 
 function prepareItemInfo(player, itemData)

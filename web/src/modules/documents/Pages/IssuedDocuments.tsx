@@ -130,48 +130,45 @@ const IssuedDocuments = () => {
     setDocumentFormOpen(true)
   }
 
-  return (
-    <>
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        <div style={{ flex: 1, marginBottom: "10px" }}>
-          <DataGrid
-            loading={documentsLoading}
-            style={{ height: '100%' }}
-            rows={documents ?? []}
-            columns={columns}
-            pageSize={5}
-            initialState={{
-              sorting: {sortModel: [{field: "createdAt", sort: 'desc'}]}
-            }}
-            rowsPerPageOptions={[5]}
-            disableSelectionOnClick
-          />
-        </div>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          {!!citizenTemplates.length && <Button variant="contained" style={{ marginRight: "8px" }} color="secondary" onClick={() => setCitizenListOpen(true)}>{texts.newCitizenDocumentBtn}</Button>}
-          <Button variant="contained" onClick={() => setTemplateListOpen(true)}>{texts.newDocumentBtn}</Button>
-        </div>
+  return (<>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ flex: 1, marginBottom: "10px" }}>
+        <DataGrid
+          loading={documentsLoading}
+          style={{ height: '100%' }}
+          rows={documents ?? []}
+          columns={columns}
+          pageSize={5}
+          initialState={{
+            sorting: {sortModel: [{field: "createdAt", sort: 'desc'}]}
+          }}
+          rowsPerPageOptions={[5]}
+          disableSelectionOnClick={false}
+        />
       </div>
-      <Dialog maxWidth="md" open={isDocumentFormOpen} onClose={() => {
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        {!!citizenTemplates.length && <Button variant="contained" style={{ marginRight: "8px" }} color="secondary" onClick={() => setCitizenListOpen(true)}>{texts.newCitizenDocumentBtn}</Button>}
+        <Button variant="contained" onClick={() => setTemplateListOpen(true)}>{texts.newDocumentBtn}</Button>
+      </div>
+    </div>
+    <Dialog maxWidth="md" open={isDocumentFormOpen} onClose={() => {
+      setDocumentFormOpen(false)
+    }}>
+      <CreateDocument isCitizen={isCitizenDocument} handleCreate={handleCreate} logoSrc={logoSrc} template={documentTemplate!} handleClose={() => {
         setDocumentFormOpen(false)
-      }}>
-        <CreateDocument isCitizen={isCitizenDocument} handleCreate={handleCreate} logoSrc={logoSrc} template={documentTemplate!} handleClose={() => {
-          setDocumentFormOpen(false)
-        }} />
-      </Dialog>
-      <CreateDocumentModal open={isTemplateListOpen} handleClose={() => setTemplateListOpen(false)} handleTemplateClick={handleTemplateSelect} />
-      <CreateDocumentModal citizen open={isCitizenListOpen} handleClose={() => setCitizenListOpen(false)} handleTemplateClick={handleTemplateSelect} />
-      <DeleteDialog
-        open={isDeleteOpen}
-        handleAgree={handleDelete}
-        handleCancel={handleCancel}
-        title={texts.deleteDocumentTitle}
-        text={`${texts.deleteDocumentQuestion} ${documentToDelete?.name || ""}`}
-      />
-      <DocumentView/>
-    </>
-
-  )
+      }} />
+    </Dialog>
+    <CreateDocumentModal open={isTemplateListOpen} handleClose={() => setTemplateListOpen(false)} handleTemplateClick={handleTemplateSelect} />
+    <CreateDocumentModal citizen open={isCitizenListOpen} handleClose={() => setCitizenListOpen(false)} handleTemplateClick={handleTemplateSelect} />
+    <DeleteDialog
+      open={isDeleteOpen}
+      handleAgree={handleDelete}
+      handleCancel={handleCancel}
+      title={texts.deleteDocumentTitle}
+      text={`${texts.deleteDocumentQuestion} ${documentToDelete?.name || ""}`}
+    />
+    <DocumentView/>
+  </>);
 }
 
 export default IssuedDocuments

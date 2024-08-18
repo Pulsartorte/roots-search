@@ -8,7 +8,7 @@ import {
     TextField,
     Typography, IconButton, Autocomplete, CircularProgress, FormControlLabel, Checkbox, Tooltip, Avatar
 } from "@mui/material"
-import {itemImagePrefix, texts} from "../../../AppConfig"
+import {debugMode, itemImagePrefix, texts} from "../../../AppConfig"
 import React, {useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import {Box} from "@mui/system";
@@ -41,13 +41,17 @@ const SetJobDialog = ({open, handleAgree, handleCancel, title, text, grades, gra
     };
 
     const handleCancelClick = () => {
-        console.log('Grade before closing')
-        console.log(selectedGrade)
+        if (debugMode){
+            console.log('Grade before closing')
+            console.log(selectedGrade)
+        }
         setSelectedGrade(null)
         setIsMultiJob(false)
         handleCancel()
-        console.log('Grade after closing')
-        console.log(selectedGrade)
+        if (debugMode){
+            console.log('Grade after closing')
+            console.log(selectedGrade)
+        }
     }
 
     const getTextWithVariable = (key: string, variable: string) => {

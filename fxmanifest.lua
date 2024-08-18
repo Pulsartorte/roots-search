@@ -24,14 +24,19 @@ shared_scripts {
 }
 
 client_scripts {
+    'init/client/init.lua',
     "modules/**/client/**/*"
 }
 server_scripts {
-    'init.lua',
+    'init/server/init.lua',
     "modules/**/server/**/*"
 }
 
 files {
     'web/build/index.html',
-    'web/build/**/*'
+    'web/build/**/*',
+    -- for ox_lib we need to provide the config file as files to require them!
+    'modules/items/config_items.lua',
+    'modules/jobs/config_jobs.lua',
+    'modules/vehicles/config_vehicles.lua',
 }

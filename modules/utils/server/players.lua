@@ -31,8 +31,8 @@ function GetQBPlayers()
     return playerReturn
 end
 
-function GetPlayerAccountName(source)
-    local player = QBCore.Functions.GetPlayer(source)
+function GetPlayerAccountName(playerId)
+    local player = QBCore.Functions.GetPlayer(playerId)
     if player then
         -- Angenommen, der Accountname ist der Spielername, den du abrufen möchtest
         local accountName = player.PlayerData.name
@@ -42,3 +42,20 @@ function GetPlayerAccountName(source)
         return nil
     end
 end
+
+--[[RegisterCallback('roots-search:server:getPlayerData', function(source, cb)
+    local src = source
+    local PlayerIdentifier = GetPlayerIdentifier(src)
+    -- TODO CHECK THE PLAYER DATA
+    MySQL.query(
+            'SELECT firstname, lastname, dateofbirth FROM users WHERE identifier = @identifier', {
+                ['@identifier'] = PlayerIdentifier
+            }, function(result)
+                cb({
+                    firstname = result[1].firstname,
+                    lastname = result[1].lastname,
+                    dateofbirth = result[1].dateofbirth,
+                    dateformat = Config.BirthdateFormat,
+                })
+            end)
+end)]]
